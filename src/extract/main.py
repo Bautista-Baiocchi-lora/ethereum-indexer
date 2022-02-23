@@ -1,5 +1,6 @@
 from typing import Dict, List
 import logging
+import time
 
 from interfaces.iextract import IExtract
 from load.main import Load
@@ -10,6 +11,8 @@ from extract.covalent import Covalent
 # todo: eventually would want each extractor running in its own process
 # for now the solution around that would be to simply run this pipeline
 # multiple times
+
+EXTRACT_SLEEP_TIME = 5  # in seconds
 
 
 class Extract(IExtract):
@@ -86,16 +89,16 @@ class Extract(IExtract):
         """
 
         for addr in self._address:
-            block_height = self._db.get_any_item(
+            block_height_item = self._db.get_any_item(
                 self._db_name, self._get_block_height_collection_name(addr)
             )
             # If it is None, then we have already set it to 0 in the
             # __init__. This will signal the extractor to extract
             # the complete history of the address
-            if block_height is None:
+            if block_height_item is None:
                 continue
 
-            self._block_height[addr] = block_height
+            self._block_height[addr] = block_height_item["block_height"]
 
     def _update_block_height(self, new_block_height: int, for_address: str) -> None:
         """
@@ -132,11 +135,10 @@ class Extract(IExtract):
         page_number = 0
         last_block_height = block_height
         latest_block_height = 0
-        loop_forever = True
 
-        while loop_forever:
+        while True:
 
-            response = self._request_transactions(for_address, page_number=page_number)
+            response = self._request_transactions(for_address, page_number)
             block_height = self._covalent.get_block_height(response)
 
             if page_number == 0:
@@ -151,39 +153,33 @@ class Extract(IExtract):
             #     response_block_height > last_block_height, increment the page
             #     number and continue until block_height_txn <= last_block_height
 
-            # nothing to update
-            if block_height <= last_block_height:
-                loop_forever = False
+            # means there are no transactions
+            if block_height is None:
                 break
 
-            # reached end of updates, or there are no transactions for the address
-            if block_height == 0:
-                loop_forever = False
+            # nothing to update
+            if block_height <= last_block_height:
                 break
 
             transactions = self._covalent.get_transactions(response)
 
-            if len(transactions) == 0:
-                logging.info(transactions)
-                loop_forever = False
-                break
-
             for txn in transactions:
                 # * block height cannot be zero here due to the check earlier
                 block_height = self._covalent.get_block_height_from_transaction(txn)
+
                 if block_height > last_block_height:
                     self._transactions.append(txn)
                 else:
-                    loop_forever = False
                     break
 
             if block_height > last_block_height:
                 page_number += 1
-            else:
-                loop_forever = False
-                break
 
-        self._update_block_height(latest_block_height, for_address)
+        if latest_block_height > last_block_height:
+            self._update_block_height(latest_block_height, for_address)
+
+        logging.info("Extractor sleeping...")
+        time.sleep(EXTRACT_SLEEP_TIME)
 
     # Interface Implementation
 
