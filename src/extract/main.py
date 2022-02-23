@@ -1,25 +1,16 @@
 from typing import Dict, List, Any
-import requests
 import logging
-import os
 
 from interfaces.iextract import IExtract
 from load.main import Load
 from utils.address import validate_address
 from utils.misc import remove_duplicates
 from db import DB
+from extract.covalent import Covalent
 
 # todo: eventually would want each extractor running in its own process
 # for now the solution around that would be to simply run this pipeline
 # multiple times
-
-# * notes
-# - possible to pull from a different blockchain if `chain_id` is different
-# - `block_signed_at=false` pulls all transactions putting most recent ones
-# at the top
-COVALENT_TRANSACTIONS_URI = (
-    lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
-)
 
 
 class Extract(IExtract):
@@ -39,10 +30,15 @@ class Extract(IExtract):
             zip(self._address, [0 for _ in self._address])
         )
 
+        self._covalent = Covalent()
+
         self._db_name = "ethereum-indexer"
 
         self._db = DB()
         self._load = Load()
+
+        # todo: type of transactions
+        self._transactions = []
 
     def __setattr__(self, key, value):
         # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
@@ -120,63 +116,80 @@ class Extract(IExtract):
         item = {"_id": 1, "block_height": new_block_height}
         self._db.put_item(item, self._db_name, collection_name)
 
-    # todo: return type here
-    def _request_transactions(self, for_address: str, page_number: int) -> Any:
-        """
-        Response looks like this
-            "data": {
-                "address": "0x94d8f036a0fbc216bb532d33bdf6564157af0cd7",
-                "updated_at": "2022-02-22T12:29:52.068887528Z",
-                "next_update_at": "2022-02-22T12:34:52.068887688Z",
-                "quote_currency": "USD",
-                "chain_id": 1,
-                "items": [<transaction>, ...],
-                "pagination": {
-                    "has_more": true,
-                    "page_number": 0,
-                    "page_size": 100,
-                    "total_count": null
-                },
-                "error": false,
-                "error_message": null,
-                "error_code": null
-            }
-
-        Args:
-            for_address (str): _description_
-            page_number (int): _description_
-
-        Returns:
-            Any: _description_
-        """
-        request_uri = COVALENT_TRANSACTIONS_URI(for_address, page_number)
-
-        # todo: check the status code
-        response = requests.get(request_uri)
-
+    def _request_transactions(self, for_address: str, page_number: int) -> None:
+        response = self._covalnet.request_transactions(for_address, page_number)
         return response
 
     def _extract_txn_history_since(self, block_height: int, for_address: str) -> None:
         """
         Makes requests to Covalent, and only extracts transactions after `block_height`
+        block number.
 
         Args:
-            block_height (int): _description_
-            for_address (str): _description_
+            block_height (int): We have data for this address up to and including this
+            block number. Our goal is to obtain transactions after this block number
+            (if there are any).
+            for_address (str): We are extracting transactions for this address.
         """
 
-        logging.info(f"[EXTRACTING] {for_address} since block: {block_height}")
+        logging.info(f"Extracting {for_address} since block: {block_height}")
 
-        latest_block_height = -1
+        page_number = 0
+        last_block_height = block_height
+        latest_block_height = 0
 
-        # todo: new_block_height
-        new_block_height = 1
-        self._update_block_height(new_block_height, for_address)
+        while True:
+
+            response = self._request_transactions(for_address, page_number=page_number)
+            block_height = self._covalent.get_block_height(response)
+
+            if page_number == 0:
+                latest_block_height = block_height
+
+            # if block height is None, the extraction has finished or there are no
+            # more transactions to extract
+            # if block_height > last_block_height
+            #   - loop through transactions adding them to our internal memory
+            #     until block_height_txn <= last_block_height
+            #   - if we have reached the end of items and we are still
+            #     response_block_height > last_block_height, increment the page
+            #     number and continue until block_height_txn <= last_block_height
+
+            # nothing to update
+            if block_height <= last_block_height:
+                break
+
+            # reached end of updates, or there are no transactions for the address
+            if block_height == 0:
+                break
+
+            transactions = self._covalent.get_transactions(response)
+
+            for txn in transactions:
+                # * block height cannot be zero here due to the check earlier
+                block_height = self._covalent.get_block_height_from_transaction(txn)
+                if block_height > last_block_height:
+                    self._transactions.append(txn)
+                else:
+                    break
+
+            if block_height > last_block_height:
+                page_number += 1
+            else:
+                break
+
+        self._update_block_height(latest_block_height, for_address)
 
     # Interface Implementation
 
     def flush(self) -> None:
-        return
+
+        if len(self._transactions) == 0:
+            return
+
+        # ! write transactions with `_load`
+
+        self._transactions = []
 
     def extract(self) -> None:
         """
