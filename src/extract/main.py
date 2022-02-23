@@ -51,8 +51,8 @@ class Extract(IExtract):
 
         if key == "_block_height":
             self.__dict__[key] = int(value)
-
-        self.__dict__[key] = value
+        else:
+            self.__dict__[key] = value
 
     def _validate_address(self, address: List[str]) -> None:
         """_summary_
