@@ -132,8 +132,9 @@ class Extract(IExtract):
         page_number = 0
         last_block_height = block_height
         latest_block_height = 0
+        loop_forever = True
 
-        while True:
+        while loop_forever:
 
             response = self._request_transactions(for_address, page_number=page_number)
             block_height = self._covalent.get_block_height(response)
@@ -152,13 +153,20 @@ class Extract(IExtract):
 
             # nothing to update
             if block_height <= last_block_height:
+                loop_forever = False
                 break
 
             # reached end of updates, or there are no transactions for the address
             if block_height == 0:
+                loop_forever = False
                 break
 
             transactions = self._covalent.get_transactions(response)
+
+            if len(transactions) == 0:
+                logging.info(transactions)
+                loop_forever = False
+                break
 
             for txn in transactions:
                 # * block height cannot be zero here due to the check earlier
@@ -166,11 +174,13 @@ class Extract(IExtract):
                 if block_height > last_block_height:
                     self._transactions.append(txn)
                 else:
+                    loop_forever = False
                     break
 
             if block_height > last_block_height:
                 page_number += 1
             else:
+                loop_forever = False
                 break
 
         self._update_block_height(latest_block_height, for_address)
