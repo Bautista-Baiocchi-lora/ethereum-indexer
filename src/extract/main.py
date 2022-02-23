@@ -19,8 +19,8 @@ class Extract(IExtract):
             address (List[str]): list of addresses for which to extract the raw historical
         transaction data.
         """
-        # todo: big issues with eth hash lib. no validation for now
-        # self._validate_address(address)
+        # todo: big issues with eth hash lib. no checksum validation for now
+        self._validate_address(address)
 
         self._address: List[str] = address
         # block number up to which the extraction has happened
@@ -49,10 +49,7 @@ class Extract(IExtract):
                     "The value of the address attribute has already been set, and can not be re-set."
                 )
 
-        if key == "_block_height":
-            self.__dict__[key] = int(value)
-        else:
-            self.__dict__[key] = value
+        self.__dict__[key] = value
 
     def _validate_address(self, address: List[str]) -> None:
         """_summary_
@@ -65,8 +62,8 @@ class Extract(IExtract):
             ValueError: _description_
         """
 
-        for a in address:
-            validate_address(a)
+        # for a in address:
+        #     validate_address(a)
 
         # * ensures there are no duplicate addresses
         # * note that if multiple instances of the pipeline
@@ -115,7 +112,7 @@ class Extract(IExtract):
         self._db.put_item(item, self._db_name, collection_name)
 
     def _request_transactions(self, for_address: str, page_number: int) -> None:
-        response = self._covalnet.request_transactions(for_address, page_number)
+        response = self._covalent.request_transactions(for_address, page_number)
         return response
 
     def _extract_txn_history_since(self, block_height: int, for_address: str) -> None:

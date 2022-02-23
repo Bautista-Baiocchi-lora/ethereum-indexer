@@ -55,8 +55,8 @@ class Covalent:
 
         # Should never happen. But since we are using this key elsewhere,
         # this check is required.
-        if "error" not in response["data"]:
-            raise ValueError("No error found in data.")
+        if "error" not in response:
+            raise ValueError("No error found in response.")
 
         if "items" not in response["data"]:
             raise ValueError("No items found in data.")
@@ -113,7 +113,7 @@ class Covalent:
         response_json = response.json()
         self._validate_transactions_response(response_json)
 
-        if response_json["data"]["error"] != False:
+        if response_json["error"] != False:
             logging.warn(
                 f"Covalent data error. Error code:{response_json['error_code']}. Error message:{response_json['error_message']}. Retrying..."
             )

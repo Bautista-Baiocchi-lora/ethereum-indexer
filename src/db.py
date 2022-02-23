@@ -18,7 +18,7 @@ class DB(IDB):
 
     def get_all_items(self, table_name: str, collection_name: str) -> List[Any]:
         db = self.client[table_name]
-        return list(db[collection_name]).find({})
+        return list(db[collection_name].find({}))
 
     def get_any_item(self, table_name: str, collection_name: str) -> Any:
         """
