@@ -1,8 +1,11 @@
 from typing import Any, Dict, Optional
+from dotenv import load_dotenv
 import time
 import logging
 import requests
 import os
+
+load_dotenv()
 
 # * notes
 # - possible to pull from a different blockchain if `chain_id` is different

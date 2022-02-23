@@ -3,7 +3,6 @@ import logging
 import time
 
 from interfaces.iextract import IExtract
-from load.main import Load
 from utils.misc import remove_duplicates
 from db import DB
 from extract.covalent import Covalent
@@ -36,7 +35,6 @@ class Extract(IExtract):
         self._db_name = "ethereum-indexer"
 
         self._db = DB()
-        self._load = Load()
 
         # todo: type of transactions
         self._transactions = []
@@ -168,6 +166,7 @@ class Extract(IExtract):
                 block_height = self._covalent.get_block_height_from_transaction(txn)
 
                 if block_height > last_block_height:
+                    txn["_id"] = txn["tx_hash"]
                     self._transactions.append(txn)
                 else:
                     break
@@ -188,7 +187,9 @@ class Extract(IExtract):
         if len(self._transactions) == 0:
             return
 
-        # ! write transactions with `_load`
+        # todo: either make it per address (do not allow list of addresses)
+        # todo: or support the list
+        self._db.put_items(self._transactions, self._db_name, self._address[0])
 
         self._transactions = []
 
