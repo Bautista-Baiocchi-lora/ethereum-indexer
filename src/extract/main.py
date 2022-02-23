@@ -1,9 +1,8 @@
-from typing import Dict, List, Any
+from typing import Dict, List
 import logging
 
 from interfaces.iextract import IExtract
 from load.main import Load
-from utils.address import validate_address
 from utils.misc import remove_duplicates
 from db import DB
 from extract.covalent import Covalent
@@ -20,9 +19,8 @@ class Extract(IExtract):
             address (List[str]): list of addresses for which to extract the raw historical
         transaction data.
         """
-        # Validate the addresses. https://github.com/ethereum/web3.py/blob/71ef3cd7edc299be64a8767c2a354a56c552555c/tests/core/utilities/test_validation.py#L11
-        # Store the address
-        self._validate_address(address)
+        # todo: big issues with eth hash lib. no validation for now
+        # self._validate_address(address)
 
         self._address: List[str] = address
         # block number up to which the extraction has happened

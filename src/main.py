@@ -23,7 +23,6 @@ def main():
         "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
         "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a",  # sylvester
     ]
-    update_frequencies = [30 * SECOND, 60 * SECOND, 120 * SECOND]
 
     # goal: avoid cross process communication
     #
@@ -40,7 +39,7 @@ def main():
     # solution I will go with.
 
     def extract_and_load():
-        extract = Extract(extract_txns_for_these, update_frequencies)
+        extract = Extract(extract_txns_for_these)
         extract()
 
     def transform_and_load():
