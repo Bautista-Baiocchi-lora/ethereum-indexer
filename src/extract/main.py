@@ -11,7 +11,7 @@ from extract.covalent import Covalent
 # for now the solution around that would be to simply run this pipeline
 # multiple times
 
-EXTRACT_SLEEP_TIME = 5  # in seconds
+EXTRACT_SLEEP_TIME = 15  # in seconds
 
 
 class Extract(IExtract):
@@ -133,8 +133,9 @@ class Extract(IExtract):
         page_number = 0
         last_block_height = block_height
         latest_block_height = 0
+        keep_looping = True
 
-        while True:
+        while keep_looping:
 
             response = self._request_transactions(for_address, page_number)
             block_height = self._covalent.get_block_height(response)
@@ -142,34 +143,22 @@ class Extract(IExtract):
             if page_number == 0:
                 latest_block_height = block_height
 
-            # if block height is None, the extraction has finished or there are no
-            # more transactions to extract
-            # if block_height > last_block_height
-            #   - loop through transactions adding them to our internal memory
-            #     until block_height_txn <= last_block_height
-            #   - if we have reached the end of items and we are still
-            #     response_block_height > last_block_height, increment the page
-            #     number and continue until block_height_txn <= last_block_height
-
-            # means there are no transactions
-            if block_height is None:
-                break
-
-            # nothing to update
-            if block_height <= last_block_height:
-                break
-
             transactions = self._covalent.get_transactions(response)
 
             for txn in transactions:
                 # * block height cannot be zero here due to the check earlier
                 block_height = self._covalent.get_block_height_from_transaction(txn)
 
+                if (block_height is None) or (block_height <= last_block_height):
+                    keep_looping = False
+                    break
+
                 if block_height > last_block_height:
                     txn["_id"] = txn["tx_hash"]
                     self._transactions.append(txn)
-                else:
-                    break
+
+            if not keep_looping:
+              break
 
             if block_height > last_block_height:
                 page_number += 1
