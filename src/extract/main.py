@@ -15,20 +15,18 @@ EXTRACT_SLEEP_TIME = 15  # in seconds
 
 
 class Extract(IExtract):
-    def __init__(self, address: List[str]):
+    def __init__(self, address: str):
         """
         Args:
-            address (List[str]): list of addresses for which to extract the raw historical
+            address (str): address for which to extract the raw historical
         transaction data.
         """
-        # todo: big issues with eth hash lib. no checksum validation for now
-        self._validate_address(address)
 
-        self._address: List[str] = address
+        # TODO: validate to ensure that this address is not in the db
+
+        self._address: str = address
         # block number up to which the extraction has happened
-        self._block_height: Dict[str, int] = dict(
-            zip(self._address, [0 for _ in self._address])
-        )
+        self._block_height: int = 0
 
         self._covalent = Covalent()
 
@@ -52,29 +50,6 @@ class Extract(IExtract):
 
         self.__dict__[key] = value
 
-    def _validate_address(self, address: List[str]) -> None:
-        """_summary_
-
-        Args:
-            address (List[str]): _description_
-
-        Raises:
-            InvalidAddress: _description_
-            ValueError: _description_
-        """
-
-        # for a in address:
-        #     validate_address(a)
-
-        # * ensures there are no duplicate addresses
-        # * note that if multiple instances of the pipeline
-        # are running with duplicate addresses, that **will**
-        # cause errors
-        without_dupes = remove_duplicates(address)
-
-        if len(without_dupes) != len(address):
-            raise ValueError("There can't be duplicates in address", address)
-
     def _get_block_height_collection_name(self, address: str) -> str:
         return f"{address}-block-height"
 
@@ -86,17 +61,16 @@ class Extract(IExtract):
         we need to restart it.
         """
 
-        for addr in self._address:
-            block_height_item = self._db.get_any_item(
-                self._db_name, self._get_block_height_collection_name(addr)
-            )
-            # If it is None, then we have already set it to 0 in the
-            # __init__. This will signal the extractor to extract
-            # the complete history of the address
-            if block_height_item is None:
-                continue
+        block_height_item = self._db.get_any_item(
+            self._db_name, self._get_block_height_collection_name(self._address)
+        )
+        # If it is None, then we have already set it to 0 in the
+        # __init__. This will signal the extractor to extract
+        # the complete history of the address
+        if block_height_item is None:
+            return
 
-            self._block_height[addr] = block_height_item["block_height"]
+        self._block_height = block_height_item["block_height"]
 
     def _update_block_height(self, new_block_height: int, for_address: str) -> None:
         """
@@ -158,7 +132,7 @@ class Extract(IExtract):
                     self._transactions.append(txn)
 
             if not keep_looping:
-              break
+                break
 
             if block_height > last_block_height:
                 page_number += 1
@@ -176,15 +150,13 @@ class Extract(IExtract):
         if len(self._transactions) == 0:
             return
 
-        # todo: either make it per address (do not allow list of addresses)
-        # todo: or support the list
-        self._db.put_items(self._transactions, self._db_name, self._address[0])
+        self._db.put_items(self._transactions, self._db_name, self._address)
 
         self._transactions = []
 
     def extract(self) -> None:
         """
-        Extracts transactions for all self._address
+        Extracts transactions for self._address
         """
 
         # Running this ensures we know what transactions to extract in the code
@@ -195,6 +167,4 @@ class Extract(IExtract):
         # if it doesn't have any transactions, download all
         # - we utilise a separate collection to track what raw transactions have
         # been extracted
-        for addr in self._address:
-            block_height = self._block_height[addr]
-            self._extract_txn_history_since(block_height, addr)
+        self._extract_txn_history_since(self._block_height, self._address)

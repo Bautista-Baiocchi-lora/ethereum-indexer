@@ -1,10 +1,9 @@
 from interfaces.itransform import ITransform
-from load.main import Load
 
 
 class Transform(ITransform):
     def __init__(self):
-        self._load = Load()
+        ...
 
     def _validate_transformers(self) -> None:
         ...
