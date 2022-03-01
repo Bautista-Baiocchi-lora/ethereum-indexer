@@ -134,6 +134,9 @@ class Extract(IExtract):
             if not keep_looping:
                 break
 
+            if block_height is None:
+                break
+
             if block_height > last_block_height:
                 page_number += 1
 
