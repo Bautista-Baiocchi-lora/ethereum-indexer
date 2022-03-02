@@ -41,7 +41,7 @@ class Extract(IExtract):
         # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
 
         # re-setting the _address, _db_name, _db, _load is not allowed
-        forbid_reset_on = ["_address", "_db_name", "_db", "_load"]
+        forbid_reset_on = ["_address", "_db_name", "_db"]
         for k in forbid_reset_on:
             if key == k and hasattr(self, k):
                 raise AttributeError(
@@ -55,7 +55,6 @@ class Extract(IExtract):
 
     def _determine_block_height(self) -> None:
         """
-        Goes through each address and determines its `block_height` value.
         This ensures we do not extract all the data all the time, but only
         the new stuff. This is also helpful in case the binary raises and
         we need to restart it.

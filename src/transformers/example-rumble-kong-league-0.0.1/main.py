@@ -6,6 +6,11 @@ class Transformer:
     def __init__(self):
         self._db = DB()
 
-    def on_transfer(decoded: Dict) -> None:
+    # todo: type that returns transformed transaction
+    def entrypoint(self):
+        # routes and performs any additional logic
+        ...
+
+    def _on_transfer(self, decoded: Dict) -> None:
         # Transfer(indexed address from, indexed address to, uint256 value)
         ...

@@ -6,7 +6,7 @@ Think of this as mathematical axioms, with which you then build proofs which you
 together to build new proofs.
 """
 import abc
-from typing import List, Any
+from typing import List, Any, Dict, Optional
 
 
 # todo: some of the items below can raise. Write docs for it
@@ -59,8 +59,11 @@ class IDB(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    # todo: concrete type for options
     @abc.abstractmethod
-    def get_all_items(self, database_name: str, collection_name: str) -> List[Any]:
+    def get_all_items(
+        self, database_name: str, collection_name: str, options: Optional[Dict]
+    ) -> List[Any]:
         raise NotImplementedError
 
     def get_any_item(self, database_name: str, collection_name: str) -> Any:

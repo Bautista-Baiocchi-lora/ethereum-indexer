@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pymongo import MongoClient
 
 from interfaces.idb import IDB
@@ -16,9 +16,30 @@ class DB(IDB):
         db = self.client[table_name]
         return db[collection_name].find({"_id": id})
 
-    def get_all_items(self, table_name: str, collection_name: str) -> List[Any]:
+    # todo: concrete type for options
+    def get_all_items(
+        self, table_name: str, collection_name: str, options: Optional[Dict]
+    ) -> List[Any]:
         db = self.client[table_name]
-        return list(db[collection_name].find({}))
+
+        if options is None:
+            return list(db[collection_name].find())
+        else:
+            if "sort" in options:
+                # todo: validation
+                sort_by = options["sort"]["sort_by"]
+                direction = options["sort"]["direction"]
+
+                query_clause = {}
+
+                if "query_clause" in options:
+                    query_clause = options["query_clause"]
+
+                return list(
+                    db[collection_name]
+                    .find(query_clause, allow_disk_use=True)
+                    .sort(sort_by, direction)
+                )
 
     def get_any_item(self, table_name: str, collection_name: str) -> Any:
         """
