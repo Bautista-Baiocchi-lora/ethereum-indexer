@@ -48,8 +48,8 @@ def main():
         transform = Transform(to_transform)
         transform()
 
-    # extract_and_load()
-    transform_and_load()
+    extract_and_load()
+    # transform_and_load()
 
     # todo: graceful keyboard interrupt
     # p1 = Process(target=extract_and_load)
