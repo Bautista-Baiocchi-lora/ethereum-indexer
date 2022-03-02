@@ -1,3 +1,4 @@
+import importlib
 import logging
 import json
 import os
@@ -70,7 +71,7 @@ class Transform(ITransform):
         """
 
         block_height_item = self._db.get_any_item(
-            self._db_name, self._get_block_height_collection_name(self._address)
+            self._db_name, self._get_block_height_collection_name()
         )
         # If it is None, then we have already set it to 0 in the __init__
         if block_height_item is None:

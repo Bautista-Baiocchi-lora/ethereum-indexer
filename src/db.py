@@ -18,7 +18,7 @@ class DB(IDB):
 
     # todo: concrete type for options
     def get_all_items(
-        self, table_name: str, collection_name: str, options: Optional[Dict]
+        self, table_name: str, collection_name: str, options: Optional[Dict] = None
     ) -> List[Any]:
         db = self.client[table_name]
 

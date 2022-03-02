@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 from db import DB
 
 # todo: needs to inherit some interface?
@@ -7,7 +7,7 @@ class Transformer:
         self._db = DB()
 
     # todo: type that returns transformed transaction
-    def entrypoint(self):
+    def entrypoint(self) -> Any:
         # routes and performs any additional logic
         ...
 
