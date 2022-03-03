@@ -117,7 +117,7 @@ class Transform(ITransform):
         # 6. Update the last block
 
         # 0.
-        full_module_name = f"{self._to_transform}.main"
+        full_module_name = f"transformers.{self._to_transform}.main"
         transformer_module = importlib.import_module(full_module_name)
         transformer = transformer_module.Transformer()
 

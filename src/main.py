@@ -13,7 +13,7 @@ def main():
         level=logging.DEBUG, format="%(relativeCreated)6d %(process)d %(message)s"
     )
 
-    to_transform = "example-rumble-kong-league-0.0.1"
+    to_transform = "example_rumble_kong_league"
 
     # extraction details. Multiplying by second for readability of code
     # rkl is the main rumble kong league collection
