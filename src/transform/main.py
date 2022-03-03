@@ -134,6 +134,10 @@ class Transform(ITransform):
             for state_item in state_items:
                 self._state.append(state_item)
 
+        # todo: remove. Purely for testing purposes
+        # with open('transformed.json', 'w') as f:
+        #     f.write(json.dumps(self._state.transformed, indent=4))
+
         # 5.
         if len(raw_transactions) == 0:
             return
