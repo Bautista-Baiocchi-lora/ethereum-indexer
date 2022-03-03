@@ -1,5 +1,4 @@
 import importlib
-import logging
 import json
 import os
 
@@ -79,14 +78,14 @@ class Transform(ITransform):
 
         self._block_height = block_height_item["block_height"]
 
-    def _update_block_height(self, new_block_height: int, for_address: str) -> None:
+    def _update_block_height(self, new_block_height: int) -> None:
         """
         Args:
             new_block_height (int): _description_
             for_address (str): _description_
         """
 
-        collection_name = self._get_block_height_collection_name(for_address)
+        collection_name = self._get_block_height_collection_name()
         # _id: 1, because we are only ever storing single block_height value per address
         item = {"_id": 1, "block_height": new_block_height}
         self._db.put_item(item, self._db_name, collection_name)
@@ -109,12 +108,18 @@ class Transform(ITransform):
         return raw_transactions
 
     def transform(self) -> None:
+        # 0. Import and instantiate the transformer
         # 1. Retrieve the last block up to which we have transformed the txns
         # 2. Read the raw transactions after that block
         # 3. Pass in the right order these transactions into individual handlers
         # 4. Handlers return transformed data which we store here in memory
-        # 5. Determine the last block from these txns
+        # 5. Determine the newest block from these txns
         # 6. Update the last block
+
+        # 0.
+        full_module_name = f"{self._to_transform}.main"
+        transformer_module = importlib.import_module(full_module_name)
+        transformer = transformer_module.Transformer()
 
         # 1.
         self._determine_block_height()
@@ -124,7 +129,18 @@ class Transform(ITransform):
 
         # 3.
         for txn in raw_transactions:
-            ...
+            # 4.
+            state_items = transformer.entrypoint(txn)
+            for state_item in state_items:
+                self._state.append(state_item)
+
+        # 5.
+        if len(raw_transactions) == 0:
+            return
+        latest_block = raw_transactions[0]["block_height"]
+
+        # 6.
+        self._update_block_height(latest_block)
 
     def flush(self) -> None:
 
