@@ -119,7 +119,7 @@ class Transform(ITransform):
         # 0.
         full_module_name = f"transformers.{self._to_transform}.main"
         transformer_module = importlib.import_module(full_module_name)
-        transformer = transformer_module.Transformer()
+        transformer = transformer_module.Transformer(self._get_address_from_config())
 
         # 1.
         self._determine_block_height()
@@ -134,9 +134,8 @@ class Transform(ITransform):
             for state_item in state_items:
                 self._state.append(state_item)
 
-        # todo: remove. Purely for testing purposes
         # with open('transformed.json', 'w') as f:
-        #     f.write(json.dumps(self._state.transformed, indent=4))
+        #     f.write(json.dumps(transformer.transformed, indent=4))
 
         # 5.
         if len(raw_transactions) == 0:

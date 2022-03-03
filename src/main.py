@@ -10,7 +10,9 @@ SECOND = 1
 
 def main():
     logging.basicConfig(
-        level=logging.DEBUG, format="%(relativeCreated)6d %(process)d %(message)s"
+        filename="example_rumble_kong_league.log",
+        level=logging.DEBUG,
+        format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
     to_transform = "example_rumble_kong_league"

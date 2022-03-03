@@ -1,11 +1,14 @@
-from typing import Dict, Any
+from typing import Any
 import logging
 
 from transform.covalent import Covalent
 
 # todo: needs to inherit some interface?
 class Transformer:
-    def __init__(self):
+    def __init__(self, address: str):
+
+        self._address = address
+
         # todo: remove. purely to test
         # let's have address -> kong id
         self.transformed = {}
@@ -16,10 +19,15 @@ class Transformer:
         logging.info(f'Handling transaction at: {txn["block_height"]} block')
 
         log_events = txn["log_events"]
+        # * ensures that events are supplied in the correct order
+        log_events = sorted(log_events, key=lambda x: x["log_offset"])
 
         for event in log_events:
 
-            logging.info(event)
+            # * means the event was emitted by something that is
+            # * not supported
+            if event["sender_address"] != self._address.lower():
+                continue
 
             # todo: this is not good.
             if event["decoded"] is None:
@@ -36,18 +44,21 @@ class Transformer:
                 decoded_params = Covalent.decode(event)
                 self._on_transfer(*decoded_params)
 
+            logging.info(event)
+
         # todo
         return []
 
     def _on_transfer(self, from_, to_, value_) -> None:
         # Transfer(indexed address from, indexed address to, uint256 value)
 
-        if from_ in self.transformed:
+        # todo: make this a constant somewhere
+        if from_ != "0x0000000000000000000000000000000000000000":
             prev = self.transformed[from_]
-            curr = prev.remove(value_)
-            self.transformed[from_] = curr
+            prev.remove(value_)
+            self.transformed[from_] = prev
 
         if to_ in self.transformed:
             self.transformed[to_].append(value_)
         else:
-            self.transformed = [value_]
+            self.transformed[to_] = [value_]
