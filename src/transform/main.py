@@ -1,13 +1,18 @@
 import importlib
+import logging
 import json
+import time
 import os
 
 from interfaces.itransform import ITransform
 from db import DB
 
+SLEEP_TIMER = 10
+
 
 class Transform(ITransform):
     def __init__(self, to_transform: str):
+        # * name of the module that will perform transforming
         self._to_transform = to_transform
 
         # ! transformers should always have a config.json inside
@@ -32,8 +37,13 @@ class Transform(ITransform):
         # block number up to which the extraction has happened
         self._block_height: int = 0
 
-        # todo: type of state
-        self._state = []
+        full_module_name = f"transformers.{self._to_transform}.main"
+        transformer_module = importlib.import_module(full_module_name)
+        # this implies that every transformer will take the address it transforms
+        # as a constructor argument
+        self._transformer = transformer_module.Transformer(
+            self._get_address_from_config()
+        )
 
         self._db_name = "ethereum-indexer"
 
@@ -43,7 +53,13 @@ class Transform(ITransform):
     def __setattr__(self, key, value):
         # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
 
-        forbid_reset_on = ["_to_transform", "_config", "_db_name", "_db"]
+        forbid_reset_on = [
+            "_to_transform",
+            "_config",
+            "_db_name",
+            "_db",
+            "_transformer",
+        ]
         for k in forbid_reset_on:
             if key == k and hasattr(self, k):
                 raise AttributeError(
@@ -108,18 +124,12 @@ class Transform(ITransform):
         return raw_transactions
 
     def transform(self) -> None:
-        # 0. Import and instantiate the transformer
         # 1. Retrieve the last block up to which we have transformed the txns
         # 2. Read the raw transactions after that block
         # 3. Pass in the right order these transactions into individual handlers
         # 4. Handlers return transformed data which we store here in memory
         # 5. Determine the newest block from these txns
         # 6. Update the last block
-
-        # 0.
-        full_module_name = f"transformers.{self._to_transform}.main"
-        transformer_module = importlib.import_module(full_module_name)
-        transformer = transformer_module.Transformer(self._get_address_from_config())
 
         # 1.
         self._determine_block_height()
@@ -130,26 +140,23 @@ class Transform(ITransform):
         # 3.
         for txn in raw_transactions:
             # 4.
-            state_items = transformer.entrypoint(txn)
-            for state_item in state_items:
-                self._state.append(state_item)
-
-        # with open('transformed.json', 'w') as f:
-        #     f.write(json.dumps(transformer.transformed, indent=4))
+            self._transformer.entrypoint(txn)
 
         # 5.
         if len(raw_transactions) == 0:
             return
-        latest_block = raw_transactions[0]["block_height"]
+        # transactions are supplied in ascending order
+        # so we should write the last transaction's block number
+        latest_block = raw_transactions[-1]["block_height"]
 
         # 6.
         self._update_block_height(latest_block)
 
     def flush(self) -> None:
 
-        if len(self._state) == 0:
-            return
+        # this way the responsibility of maintaining complex state and
+        # writing it to db is with the transformer
+        self._transformer.flush()
 
-        self._db.put_items(self._state, self._db_name, self._collection_name)
-
-        self._state = []
+        logging.info("Transformer sleeping...")
+        time.sleep(SLEEP_TIMER)
