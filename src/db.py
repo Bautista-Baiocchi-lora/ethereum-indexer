@@ -24,6 +24,9 @@ class DB(IDB):
     ) -> List[Any]:
         db = self.client[database_name]
 
+        if options is None:
+            return list(db[collection_name].find())
+
         if "sort" in options:
             # todo: validation
             sort_by = options["sort"]["sort_by"]
@@ -40,6 +43,8 @@ class DB(IDB):
                 .sort(sort_by, direction)
             )
 
+        # todo: not really needed here, but pylint will complain
+        # todo if removed
         return list(db[collection_name].find())
 
     def get_any_item(
