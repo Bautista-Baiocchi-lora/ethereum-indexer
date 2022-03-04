@@ -1,9 +1,9 @@
-from typing import Any, Dict, Optional
-from dotenv import load_dotenv
 import time
 import logging
-import requests
 import os
+from typing import Any, Dict, Optional
+from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
@@ -11,15 +11,24 @@ load_dotenv()
 # - possible to pull from a different blockchain if `chain_id` is different
 # - `block_signed_at=false` pulls all transactions putting most recent ones
 # at the top
-COVALENT_TRANSACTIONS_URI = (
-    lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
+COVALENT_TRANSACTIONS_URI = lambda address, page_number: (
+    "https://api.covalenthq.com/v1/1/address/"
+    + str(address)
+    + "/transactions_v2/?quote-currency=USD"
+    + "&format=JSON&block-signed-at-asc=false"
+    + "&no-logs=false&page-number="
+    + str(page_number)
+    + "&key="
+    + os.environ["COVALENT_API_KEY"]
+    + "&page-size=100"
 )
 
 REQUEST_TRANSACTIONS_SLEEP = 5  # in seconds
 
 
 class Covalent:
-    def _validate_transactions_response(self, response: Dict[str, Any]) -> None:
+    @staticmethod
+    def _validate_transactions_response(response: Dict[str, Any]) -> None:
         """_summary_
 
         Args:
@@ -106,8 +115,9 @@ class Covalent:
         response = requests.get(request_uri)
 
         if response.status_code != 200:
-            logging.warn(
-                f"Can't pull transactions. Response status code:{response.status_code}. Response:{response.text}. Retrying..."
+            logging.warning(
+                f"Can't pull transactions. Response status code:{response.status_code}.",
+                " Response:{response.text}. Retrying...",
             )
             # todo: might need tweaking
             time.sleep(REQUEST_TRANSACTIONS_SLEEP)
@@ -116,9 +126,10 @@ class Covalent:
         response_json = response.json()
         self._validate_transactions_response(response_json)
 
-        if response_json["error"] != False:
-            logging.warn(
-                f"Covalent data error. Error code:{response_json['error_code']}. Error message:{response_json['error_message']}. Retrying..."
+        if response_json["error"] is not False:
+            logging.warning(
+                f"Covalent data error. Error code:{response_json['error_code']}.",
+                " Error message:{response_json['error_message']}. Retrying...",
             )
             # todo: might need tweaking
             time.sleep(REQUEST_TRANSACTIONS_SLEEP)
@@ -145,7 +156,16 @@ class Covalent:
         return transactions
 
     # todo: transaction type
-    def get_block_height_from_transaction(self, transaction: Any) -> int:
+    @staticmethod
+    def get_block_height_from_transaction(transaction: Any) -> int:
+        """_summary_
+
+        Args:
+            transaction (Any): _description_
+
+        Returns:
+            int: _description_
+        """
         return transaction["block_height"]
 
     def get_block_height(self, response: requests.Response) -> Optional[int]:
@@ -167,5 +187,5 @@ class Covalent:
 
         if len(transactions) == 0:
             return None
-        else:
-            return self.get_block_height_from_transaction(transactions[0])
+
+        return self.get_block_height_from_transaction(transactions[0])

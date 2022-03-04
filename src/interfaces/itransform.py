@@ -60,10 +60,25 @@ class ITransform(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def transform(self) -> None:
+        """
+        Transforms the raw transactions' events.
+
+        Raises:
+            NotImplementedError: If this function is not
+            implemented.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def flush(self) -> None:
+        """
+        Persists the transformed data. Could be through the means
+        of writing to the database.
+
+        Raises:
+            NotImplementedError: If this function is not
+            implemented.
+        """
         raise NotImplementedError
 
     def __call__(self):

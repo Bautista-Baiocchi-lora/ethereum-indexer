@@ -34,6 +34,9 @@ class IExtract(metaclass=abc.ABCMeta):
         Extracts the new data since the last extraction. If this
         is the first extraction, then extracts everything up to now.
         Indicates if extraction was successful upon completion.
+
+        Raises:
+            NotImplementedError: _description_
         """
         raise NotImplementedError
 
@@ -42,6 +45,9 @@ class IExtract(metaclass=abc.ABCMeta):
         """
         Flushes the extracted in memory data into the db or other
         means of storage.
+
+        Raises:
+            NotImplementedError: if this function is not implemented.
         """
         raise NotImplementedError
 

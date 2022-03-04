@@ -5,10 +5,12 @@ import logging
 from extract.main import Extract
 from transform.main import Transform
 
-SECOND = 1
-
 
 def main():
+    """Starts the whole ETL pipeline. Creates two separate processes.
+    One for extraction, and one for transforming.
+    """
+
     logging.basicConfig(
         filename="example_rumble_kong_league.log",
         level=logging.DEBUG,
@@ -17,7 +19,6 @@ def main():
 
     to_transform = "example_rumble_kong_league"
 
-    # extraction details. Multiplying by second for readability of code
     # rkl is the main rumble kong league collection
     # azrael is renft's v1 collateral solution
     # sylvester is renft's v1 collateral free solution
@@ -27,20 +28,6 @@ def main():
     # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
     # "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a",  # sylvester
-
-    # goal: avoid cross process communication
-    #
-    # solution 1: Make extract and load asynchronous. Not ideal because
-    # that introduces a notch of complexity
-    #
-    # solution 2: Thread the tasks. They would share the context, so it
-    # will be easy to share the resources (extracted data; or transformed
-    # data). Does not add to complexity as much as other options.
-    #
-    # solution 3: ignore separation of concerns and have load be part
-    # of the interfaces that are required to be persisted. Even though,
-    # this is not ideal. I like this solution the best. This is the
-    # solution I will go with.
 
     def extract_and_load():
         extract = Extract(address)

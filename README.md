@@ -33,5 +33,5 @@ This should be ran in your `poetry` environment. To drop into poetry environment
 1. Dockerfile
 2. pre-commit linter
 3. commit linter
-4. remove web3 dep. just use their utility functions instead
-5. back ups
+4. back ups
+5. remove the disable of duplicate code in .pylintrc (i.e. refactor the code such that there is no duplicate code)

@@ -27,7 +27,8 @@ class Transform(ITransform):
 
         # * 1. information about what address to transform
         # * 2. information about events are handled
-        self._config = json.loads(open(config_path).read())
+        with open(config_path, encoding="utf-8") as f:
+            self._config = json.loads(f.read())
 
         # todo: validate that the address in config is valid
         # todo: validate that the address is being scraped (i.e. is in the db)
@@ -63,7 +64,8 @@ class Transform(ITransform):
         for k in forbid_reset_on:
             if key == k and hasattr(self, k):
                 raise AttributeError(
-                    "The value of the address attribute has already been set, and can not be re-set."
+                    "The value of the address attribute has already been set,"
+                    " and can not be re-set."
                 )
 
         self.__dict__[key] = value
@@ -124,6 +126,8 @@ class Transform(ITransform):
         return raw_transactions
 
     def transform(self) -> None:
+        """@inheritdoc ITransform"""
+
         # 1. Retrieve the last block up to which we have transformed the txns
         # 2. Read the raw transactions after that block
         # 3. Pass in the right order these transactions into individual handlers
@@ -153,6 +157,7 @@ class Transform(ITransform):
         self._update_block_height(latest_block)
 
     def flush(self) -> None:
+        """@inheritdoc ITransform"""
 
         # this way the responsibility of maintaining complex state and
         # writing it to db is with the transformer

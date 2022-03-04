@@ -8,6 +8,14 @@ class Covalent(Covalent_):
     # todo: better txn type
     @staticmethod
     def decode(event: Dict) -> List:
+        """_summary_
+
+        Args:
+            event (Dict): _description_
+
+        Returns:
+            List: _description_
+        """
 
         decoded = []
 
@@ -18,7 +26,7 @@ class Covalent(Covalent_):
         decoded_params = event["decoded"]["params"]
 
         for ix, decoded_param in enumerate(decoded_params):
-            if decoded_param["decoded"] == True:
+            if decoded_param["decoded"] is True:
                 decoded.append(decoded_param["value"])
             else:
                 raw_param = raw_log_topics[ix + 1]

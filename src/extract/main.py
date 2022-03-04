@@ -1,9 +1,7 @@
-from typing import Dict, List
 import logging
 import time
 
 from interfaces.iextract import IExtract
-from utils.misc import remove_duplicates
 from db import DB
 from extract.covalent import Covalent
 
@@ -45,12 +43,14 @@ class Extract(IExtract):
         for k in forbid_reset_on:
             if key == k and hasattr(self, k):
                 raise AttributeError(
-                    "The value of the address attribute has already been set, and can not be re-set."
+                    "The value of the address attribute has already been set,",
+                    " and can not be re-set.",
                 )
 
         self.__dict__[key] = value
 
-    def _get_block_height_collection_name(self, address: str) -> str:
+    @staticmethod
+    def _get_block_height_collection_name(address: str) -> str:
         return f"{address}-block-height"
 
     def _determine_block_height(self) -> None:
@@ -148,6 +148,7 @@ class Extract(IExtract):
     # Interface Implementation
 
     def flush(self) -> None:
+        """@inheritdoc IExtract"""
 
         if len(self._transactions) == 0:
             return
@@ -157,9 +158,7 @@ class Extract(IExtract):
         self._transactions = []
 
     def extract(self) -> None:
-        """
-        Extracts transactions for self._address
-        """
+        """@inheritdoc IExtract"""
 
         # Running this ensures we know what transactions to extract in the code
         # will follow. This avoids extracting all the transactions all the time.

@@ -22,6 +22,12 @@ class Transformer:
 
     # todo: type that returns transformed transaction
     def entrypoint(self, txn) -> None:
+        """_summary_
+
+        Args:
+            txn (_type_): _description_
+        """
+
         # 1. check if there is state in the db
         # 2. if there is state in the db, update memory with it
         self.update_memory_state()
@@ -44,13 +50,17 @@ class Transformer:
             # todo: if this were to happen in an event that pertains to
             # todo: our address, it would corrupt the state
             if event["decoded"] is None:
-                logging.warn(f"No name for event: {event}")
+                logging.warning(f"No name for event: {event}")
                 continue
 
             if event["decoded"]["name"] == "Transfer":
                 decoded_params = Covalent.decode(event)
-
-                self._on_transfer(*decoded_params)
+                from_, to, value = (
+                    decoded_params[0],
+                    decoded_params[1],
+                    decoded_params[2],
+                )
+                self._on_transfer(from_, to, value)
 
             logging.info(event)
 
@@ -59,6 +69,8 @@ class Transformer:
     # todo: should be part of the interface
     # todo: acts as the means to sync with db state
     def update_memory_state(self) -> None:
+        """_summary_"""
+
         state = self._db.get_any_item(self._db_name, self._collection_name)
 
         if state is None:
@@ -68,6 +80,8 @@ class Transformer:
 
     # todo: should be part of the interface
     def flush(self) -> None:
+        """_summary_"""
+
         if self._flush_state:
             # * write to the db
             self._db.put_item(self._transformed, self._db_name, self._collection_name)

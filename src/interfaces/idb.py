@@ -29,33 +29,47 @@ class IDB(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def put_item(self, item: Any, database_name: str, collection_name: str) -> None:
-        """
-        Load in the data set
-        @param item:
-        @param database_name:
-        @param collection_name:
+        """_summary_
+
+        Args:
+            item (Any): _description_
+            database_name (str): _description_
+            collection_name (str): _description_
+
+        Raises:
+            NotImplementedError: _description_
         """
         raise NotImplementedError
 
     def put_items(
         self, items: List[Any], database_name: str, collection_name: str
     ) -> None:
-        """
-        Users are free to override to make use of in-built db batching API.
-        @param items:
-        @param database_name:
-        @param collection_name:
+        """_summary_
+
+        Args:
+            items (List[Any]): _description_
+            database_name (str): _description_
+            collection_name (str): _description_
         """
         for item in items:
             self.put_item(item, database_name, collection_name)
 
     @abc.abstractmethod
-    def get_item(self, id: str, database_name: str, collection_name: str) -> Any:
-        """
-        Load in the data set
-        @param id:
-        @param database_name:
-        @param collection_name:
+    def get_item(
+        self, identifier: str, database_name: str, collection_name: str
+    ) -> Any:
+        """_summary_
+
+        Args:
+            identifier (str): _description_
+            database_name (str): _description_
+            collection_name (str): _description_
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            Any: _description_
         """
         raise NotImplementedError
 
@@ -64,9 +78,24 @@ class IDB(metaclass=abc.ABCMeta):
     def get_all_items(
         self, database_name: str, collection_name: str, options: Optional[Dict]
     ) -> List[Any]:
+        """_summary_
+
+        Args:
+            database_name (str): _description_
+            collection_name (str): _description_
+            options (Optional[Dict]): _description_
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            List[Any]: _description_
+        """
         raise NotImplementedError
 
-    def get_any_item(self, database_name: str, collection_name: str) -> Any:
+    def get_any_item(
+        self, database_name: str, collection_name: str, options: Optional[Dict] = None
+    ) -> Any:
         """
         Gets any item from a collection.
         This is useful to figure out if collection even exists.
@@ -74,10 +103,15 @@ class IDB(metaclass=abc.ABCMeta):
         the collection, because you can perform some actions on the
         attributes of the returned result, for example.
 
-        @param database_name:
-        @param collection_name:
+        Args:
+            database_name (str): _description_
+            collection_name (str): _description_
+            options (Optional[Dict], optional): _description_. Defaults to None.
+
+        Returns:
+            Any: _description_
         """
-        all_items = self.get_all_items(database_name, collection_name)
+        all_items = self.get_all_items(database_name, collection_name, options)
         return all_items[0]
 
     def get_items(
@@ -90,7 +124,9 @@ class IDB(metaclass=abc.ABCMeta):
         @param collection_name:
         """
         out: List[Any] = []
-        for id in ids:
-            item = self.get_item(id, database_name, collection_name)
+
+        for identifier in ids:
+            item = self.get_item(identifier, database_name, collection_name)
             out.append(item)
+
         return out
