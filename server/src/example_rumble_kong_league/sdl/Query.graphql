@@ -4,5 +4,6 @@ type KongHolder {
 }
 
 type Query {
-  getKongs(address: String!): [Int!]! # if address is not a kong holder => []
+  kongHolders: [String!]!
+  kongsByAddress(address: String!): [Int!]! # if address is not a kong holder => []
 }

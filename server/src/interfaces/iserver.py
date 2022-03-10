@@ -19,18 +19,16 @@ used (i.e. not all of the servers will be used).
 Example:
 src
  |
- |servers
+ | main.py (IServer Implementation)
+ | rumble-kong-league-0.0.1
  |  |
- |  | main.py (IServer Implementation)
- |  | rumble-kong-league-0.0.1
- |  |  |
- |  |  | query_resolver.py
- |  |  | sdl
- |  |  |  | Query.graphql
- |  |  |  | Subscription.graphql (if needed)
- |  | libs
- |  |  |
- |  |  | custom scalars, directives and modules shared across servers
+ |  | query_resolver.py
+ |  | sdl
+ |  |  | Query.graphql
+ |  |  | Subscription.graphql (if needed)
+ | libs
+ |  |
+ |  | custom scalars, directives and modules shared across servers
 
 
 """
