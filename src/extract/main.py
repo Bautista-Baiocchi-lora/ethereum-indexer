@@ -1,8 +1,9 @@
 import logging
 import time
 
-from interfaces.iextract import IExtract
 from db import DB
+from interfaces.iextract import IExtract
+
 from extract.covalent import Covalent
 
 # todo: eventually would want each extractor running in its own process
