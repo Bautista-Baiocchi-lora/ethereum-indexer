@@ -1,10 +1,18 @@
 #!/usr/bin/env python
-from multiprocessing import Process
 import logging
+from multiprocessing import Process
 
 from extract.main import Extract
 from transform.main import Transform
 
+
+def extract_and_load(address:str) -> None:
+    extract = Extract(address)
+    extract()
+
+def transform_and_load(to_transform:str) -> None:
+    transform = Transform(to_transform)
+    transform()
 
 def main():
     """Starts the whole ETL pipeline. Creates two separate processes.
@@ -29,21 +37,23 @@ def main():
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
     # "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a",  # sylvester
 
-    def extract_and_load():
-        extract = Extract(address)
-        extract()
-
-    def transform_and_load():
-        transform = Transform(to_transform)
-        transform()
 
     # todo: graceful keyboard interrupt
-    p1 = Process(target=extract_and_load)
-    p2 = Process(target=transform_and_load)
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
+    extractor = Process(target=extract_and_load, args=[address])
+    transformer = Process(target=transform_and_load, args=[to_transform])
+
+
+    extractor.start()
+    logging.info("Extractor started.")
+
+    transformer.start()
+    logging.info("Transformer started.")
+
+
+    extractor.join() # wait to finish
+    transformer.join() # wait to finish
+
+    logging.info("Indexer closing down...")
 
 
 if __name__ == "__main__":
