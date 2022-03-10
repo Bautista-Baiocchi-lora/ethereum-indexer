@@ -1,5 +1,5 @@
 
-from interfaces.iserver import IServer
+from server.src.interfaces.iserver import IServer
 
 
 class Server(IServer):
