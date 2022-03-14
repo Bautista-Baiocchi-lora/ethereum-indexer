@@ -1,9 +1,10 @@
-import time
 import logging
 import os
+import time
 from typing import Any, Dict, Optional
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -117,7 +118,7 @@ class Covalent:
         if response.status_code != 200:
             logging.warning(
                 f"Can't pull transactions. Response status code:{response.status_code}.",
-                " Response:{response.text}. Retrying...",
+                f" Response:{response.text}. Retrying...",
             )
             # todo: might need tweaking
             time.sleep(REQUEST_TRANSACTIONS_SLEEP)
@@ -129,7 +130,7 @@ class Covalent:
         if response_json["error"] is not False:
             logging.warning(
                 f"Covalent data error. Error code:{response_json['error_code']}.",
-                " Error message:{response_json['error_message']}. Retrying...",
+                f" Error message:{response_json['error_message']}. Retrying...",
             )
             # todo: might need tweaking
             time.sleep(REQUEST_TRANSACTIONS_SLEEP)
