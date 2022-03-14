@@ -21,6 +21,9 @@ class DB(IDB):
     def put_items(
         self, items: List[Any], database_name: str, collection_name: str
     ) -> None:
+        if items is None or len(items) == 0:
+            return 
+            
         db = self.client[database_name]
         db[collection_name].insert_many(items)
 
