@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import logging
+import sys
 from multiprocessing import Process
 
 from extract.main import Extract
@@ -25,13 +26,13 @@ def main():
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    to_transform = "sylvester"
+    to_transform = "azrael"
 
     # rkl is the main rumble kong league collection
     # azrael is renft's v1 collateral solution
     # sylvester is renft's v1 collateral free solution
     # renft is a leading p2p nft rentals protocol
-    address = "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a"
+    address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
 
     # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
@@ -57,4 +58,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
