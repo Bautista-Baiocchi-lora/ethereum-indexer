@@ -45,12 +45,12 @@ class Server(IServer):
 
 def main():
     logging.basicConfig(
-        filename="example_rumble_kong_league.log",
+        filename="azrael.log",
         level=logging.DEBUG,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    server = Server("example_rumble_kong_league", port=8080, graphiql_debug=True)
+    server = Server("azrael", port=8080, graphiql_debug=True)
     server()
 
     logging.debug("server started")

@@ -6,7 +6,7 @@ Think of this as mathematical axioms, with which you then build proofs which you
 together to build new proofs.
 """
 import abc
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 # todo: some of the items below can raise. Write docs for it
 
@@ -36,5 +36,26 @@ class IDB(metaclass=abc.ABCMeta):
 
         Returns:
             Any: _description_
+        """
+        raise NotImplementedError
+
+
+    @abc.abstractmethod
+    def get_N_items(
+        self, database_name: str, collection_name: str, N: int, options: Optional[Dict]
+    ) -> List[Any]:
+        """_summary_
+
+        Args:
+            database_name (str): name of the database
+            collection_name (str): name of the collection
+            N (int): Amount of items to fetch
+            options (Optional[Dict]): _description_
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            List[Any]: _description_
         """
         raise NotImplementedError
