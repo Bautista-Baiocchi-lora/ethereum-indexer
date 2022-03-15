@@ -41,21 +41,39 @@ class IDB(metaclass=abc.ABCMeta):
 
 
     @abc.abstractmethod
-    def get_N_items(
-        self, database_name: str, collection_name: str, N: int, options: Optional[Dict]
+    def get_all_items(
+        self, database_name: str, collection_name: str, limit: int, options: Optional[Dict]
     ) -> List[Any]:
         """_summary_
 
         Args:
             database_name (str): name of the database
             collection_name (str): name of the collection
-            N (int): Amount of items to fetch
-            options (Optional[Dict]): _description_
+            limit (int): Maximum amount of items to fetch
+            options (Optional[Dict]): "query", "sort"
 
         Raises:
             NotImplementedError: _description_
 
         Returns:
             List[Any]: _description_
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def count_documents(
+        self, database_name: str, collection_name: str, options: Optional[Dict]
+    ) -> int:
+        """_summary_
+
+        Args:
+            database_name (str): name of the database
+            collection_name (str): name of the collection
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            Any: _description_
         """
         raise NotImplementedError

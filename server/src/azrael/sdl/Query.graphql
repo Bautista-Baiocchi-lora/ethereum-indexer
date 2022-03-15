@@ -1,5 +1,5 @@
 # ReNFT Escrow contract events are served to be consumed
-# Using these events, the on-chain state can be reconstructed
+# Using these events, the on-chain state can be reconstructed anywhere
 
 enum EventType {
   LENT
@@ -12,18 +12,16 @@ enum EventType {
 interface Event {
   tx_hash: String!
   tx_offset: Int!
-  event: EventType!
 }
 
 type Lent implements Event {
   tx_hash: String!
   tx_offset: Int!
-  event: EventType!
   nftAddress: String!
   tokenId: String!
   lentAmount: Int!
   lendingId: Int!
-  lendingAddress: String!
+  lendersAddress: String!
   maxRentDuration: Int!
   dailyRentPrice: Float!
   nftPrice: Float!
@@ -31,6 +29,46 @@ type Lent implements Event {
   paymentToken: Int!
 }
 
+type Rented implements Event {
+  tx_hash: String!
+  tx_offset: Int!
+  lendingId: Int!
+  renterAddress: String!
+  rentDuration: Int!
+  rentedAt: Int!
+}
+
+type Returned implements Event {
+  tx_hash: String!
+  tx_offset: Int!
+  lendingId: Int!
+  returnedAt: Int!
+}
+
+type LendingStopped implements Event {
+  tx_hash: String!
+  tx_offset: Int!
+  lendingId: Int!
+  stoppedAt: Int!
+}
+
+type CollateralClaimed implements Event {
+  tx_hash: String!
+  tx_offset: Int!
+  lendingId: Int!
+  claimedAt: Int!
+}
+
 type Query {
-  lentEvents: [Lent!]!
+  getLentEvents(limit: Int = -1, ascending: Boolean = true): [Lent!]!
+  getRentedEvents(limit: Int = -1, ascending: Boolean = true): [Rented!]!
+  getReturnedEvents(limit: Int = -1, ascending: Boolean = true): [Returned!]!
+  getLendingStoppedEvents(
+    limit: Int = -1
+    ascending: Boolean = true
+  ): [LendingStopped!]!
+  getCollateralClaimedEvents(
+    limit: Int = -1
+    ascending: Boolean = true
+  ): [CollateralClaimed!]!
 }
