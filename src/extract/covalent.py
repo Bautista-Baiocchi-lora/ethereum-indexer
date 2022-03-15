@@ -7,12 +7,15 @@ import requests
 
 load_dotenv()
 
+ETHEREUM_MAINNET_CHAIN_ID = 1
+ETHEREUM_KOVAN_CHAIN_ID = 42
+
 # * notes
 # - possible to pull from a different blockchain if `chain_id` is different
 # - `block_signed_at=false` pulls all transactions putting most recent ones
 # at the top
 COVALENT_TRANSACTIONS_URI = lambda address, page_number: (
-    "https://api.covalenthq.com/v1/1/address/"
+    f"https://api.covalenthq.com/v1/{ETHEREUM_KOVAN_CHAIN_ID}/address/"
     + str(address)
     + "/transactions_v2/?quote-currency=USD"
     + "&format=JSON&block-signed-at-asc=false"
