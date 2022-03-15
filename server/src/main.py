@@ -45,12 +45,12 @@ class Server(IServer):
 
 def main():
     logging.basicConfig(
-        filename="azrael.log",
+        filename="sylvester.log",
         level=logging.DEBUG,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    server = Server("azrael", port=8080, graphiql_debug=True)
+    server = Server("sylvester", port=8080, graphiql_debug=True)
     server()
 
     logging.debug("server started")

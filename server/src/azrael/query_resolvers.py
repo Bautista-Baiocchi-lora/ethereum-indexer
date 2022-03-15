@@ -1,6 +1,6 @@
 
 
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 import pymongo
 from db import DB
@@ -61,7 +61,7 @@ _transform_lending_stopped_event = lambda doc: _remove_event_field(_cast_lending
 
 _transform_collateral_claimed_event = lambda doc: _remove_event_field(_cast_collateral_claimed_event_fields(_parse_id(doc)))
 
-async def resolve_event(name: str, args: Dict, transformer: Callable):
+async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingId'):
     """
     Resolve event
     """
@@ -70,7 +70,7 @@ async def resolve_event(name: str, args: Dict, transformer: Callable):
     order = pymongo.ASCENDING if args['ascending'] else pymongo.DESCENDING
 
     query  = {'event': name}
-    sort = [('lendingId', order)]
+    sort = [(sort_by, order)]
 
     # lendingId is stored as a String but we want to sort it as a number
     collation = {'locale': 'en', 'numericOrdering': True}
