@@ -44,8 +44,8 @@ class Server(IServer):
 
 def main():
 
-    log_file = "azrael.log"
-    to_serve = "azrael"
+    log_file = "sylvester.log"
+    to_serve = "sylvester"
 
     logging.basicConfig(
         filename=log_file,

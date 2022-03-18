@@ -1,70 +1,30 @@
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, List, Optional
 
 import pymongo
 from db import DB
 from tartiflette import Resolver
+
+from sylvester.event import (Event, LendEvent, RentClaimedEvent, RentEvent,
+                             StopLendEvent, StopRentEvent)
 
 database_name = 'ethereum-indexer'
 collection_name = '0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a-state'
 
 db = DB()
 
-
-def _remove_event_field(doc): 
-    del doc['event']
-    return doc
-
-def _cast_lend_event_fields(doc):
-    doc['lendingID'] = int(doc['lendingID'])
-    doc['lendAmount'] = int(doc['lendAmount'])
-    doc['maxRentDuration'] = int(doc['maxRentDuration'])
-    doc['paymentToken'] = int(doc['paymentToken'])
-    return doc
-
-def _cast_rented_event_fields(doc):
-    doc['lendingID'] = int(doc['lendingID'])
-    doc['rentingID'] = int(doc['rentingID'])
-    doc['rentAmount'] = int(doc['rentAmount'])
-    doc['rentDuration'] = int(doc['rentDuration'])
-    doc['rentedAt'] = int(doc['rentedAt'])
-    return doc
-
-def _cast_stop_rent_event_fields(doc):
-    doc['rentingID'] = int(doc['rentingID'])
-    doc['stoppedAt'] = int(doc['stoppedAt'])
-    return doc
-
-def _cast_stop_lend_event_fields(doc):
-    doc['lendingID'] = int(doc['lendingID'])
-    doc['stoppedAt'] = int(doc['stoppedAt'])
-    return doc
-    
-def _cast_rent_claimed_event_fields(doc):
-    doc['rentingID'] = int(doc['rentingID'])
-    doc['collectedAt'] = int(doc['collectedAt'])
-    return doc
-
-def _parse_id(doc):
-    id = doc['_id'].split('_')
-    doc['tx_hash'] = id[0]
-    doc['tx_offset'] = id[1]
-
-    del doc['_id']
-    return doc
-
-_transform_lend_event = lambda doc: _remove_event_field(_cast_lend_event_fields(_parse_id(doc)))
-
-_transform_rent_event = lambda doc: _remove_event_field(_cast_rented_event_fields(_parse_id(doc)))
-
-_transform_stop_rent_event = lambda doc: _remove_event_field(_cast_stop_rent_event_fields(_parse_id(doc)))
-
-_transform_stop_lend_event = lambda doc: _remove_event_field(_cast_stop_lend_event_fields(_parse_id(doc)))
-
-_transform_rent_claimed_event = lambda doc: _remove_event_field(_cast_rent_claimed_event_fields(_parse_id(doc)))
-
-async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingID'):
+# TODO: This method is almost identical to one inside azrael.query_resolver
+async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingID') -> List[Event]:
     """
-    Resolve event
+    Resolves Sylveser v1 event graphql query generically.
+
+    Args:
+        name (str): name of the event
+        args (Dict): Graphql function parameters specified in query
+        transformer (Callable): Callable function that map a mongodb doc to Sylvester v1 event
+        sort_by (Optional[str]): Index to sort mongodv results by. Defaults to 'lendingId'
+
+    Returns:
+        List[Event]: List of Sylvester v1 events.
     """
 
     limit = args['limit']
@@ -78,54 +38,69 @@ async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: O
 
     options = {'query': query, 'sort': sort, 'collation': collation}
 
-    result  = await db.get_all_items(database_name, collection_name, limit, options)
+    results  = await db.get_all_items(database_name, collection_name, limit, options)
 
-    return list(map(transformer, result))
+    return list(map(transformer, results))
 
 
 
 @Resolver("Query.getLendEvents")
-async def resolve_get_lent_events(parent, args, ctx, info):
+async def resolve_get_lend_events(parent, args, ctx, info) -> List[LendEvent]:
     """
-    Get all lent events
+    Resolves 'getLendEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        List[LendEvent]: Event instance compatible with LendEvent Sylvester v1 Graphql schema.
     """
 
-    return await resolve_event('Lend', args, _transform_lend_event)
+    return await resolve_event('Lend', args, LendEvent.from_doc)
 
 
 @Resolver("Query.getRentEvents")
-async def resolve_get_rent_events(parent, args, ctx, info):
+async def resolve_get_rent_events(parent, args, ctx, info) -> List[RentEvent]:
     """
-    Get all rent events
+    Resolves 'getRentEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        List[RentEvent]: Event instance compatible with RentEvent Sylvester v1 Graphql schema.
     """
 
-    return await resolve_event('Rent', args, _transform_rent_event)
+    return await resolve_event('Rent', args, RentEvent.from_doc)
 
 
 
 @Resolver("Query.getStopRentEvents")
-async def resolve_get_rent_events(parent, args, ctx, info):
+async def resolve_get_stop_rent_events(parent, args, ctx, info) -> List[StopRentEvent]:
     """
-    Get all stop rent events
+    Resolves 'getStopRentEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        List[StopRentEvent]: Event instance compatible with StopRent Sylvester v1 Graphql schema.
     """
 
-    return await resolve_event('StopRent', args, _transform_stop_rent_event, sort_by = 'rentingID')
+    return await resolve_event('StopRent', args, StopRentEvent.from_doc, sort_by = 'rentingID')
 
 
 @Resolver("Query.getStopLendEvents")
-async def resolve_get_rent_events(parent, args, ctx, info):
+async def resolve_get_stop_lend_events(parent, args, ctx, info) -> List[StopLendEvent]:
     """
-    Get all stop lend events
+    Resolves 'getStopLendEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        List[StopRentEvent]: Event instance compatible with StopLend Sylvester v1 Graphql schema.
     """
 
-    return await resolve_event('StopLend', args, _transform_stop_lend_event)
+    return await resolve_event('StopLend', args, StopLendEvent.from_doc)
 
 
 
 @Resolver("Query.getRentClaimedEvents")
-async def resolve_get_rent_events(parent, args, ctx, info):
+async def resolve_get_rent_claimed_events(parent, args, ctx, info) -> List[RentClaimedEvent]:
     """
-    Get all rent claimed events
+    Resolves 'getRentClaimedEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        List[RentClaimedEvent]: Event instance compatible with RentClaimed Sylvester v1 Graphql schema.
     """
 
-    return await resolve_event('RentClaimed', args, _transform_rent_claimed_event, sort_by = 'rentingID')
+    return await resolve_event('RentClaimed', args, RentClaimedEvent.from_doc, sort_by = 'rentingID')
