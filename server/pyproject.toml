@@ -2,7 +2,7 @@
 name = "ethereum-indexer-graphql-server"
 version = "0.1.0"
 description = "Graphql server for blockchain indexer"
-authors = ["Your Name <you@example.com>"]
+authors = ["RKL <hello@rl.games>"]
 license = "MIT"
 
 [tool.poetry.dependencies]

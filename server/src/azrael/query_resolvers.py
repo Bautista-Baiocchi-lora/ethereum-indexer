@@ -1,69 +1,29 @@
-
-
 from typing import Callable, Dict, Optional
 
 import pymongo
 from db import DB
 from tartiflette import Resolver
 
+from azrael.event import (CollateralClaimed, LendingStopped, LentEvent,
+                          RentedEvent, ReturnedEvent)
+
 database_name = 'ethereum-indexer'
 collection_name = '0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7-state'
 
 db = DB()
 
-def _remove_event_field(doc): 
-    del doc['event']
-    return doc
-
-def _cast_lent_event_fields(doc):
-    doc['lendingId'] = int(doc['lendingId'])
-    doc['lentAmount'] = int(doc['lentAmount'])
-    doc['maxRentDuration'] = int(doc['maxRentDuration'])
-    doc['paymentToken'] = int(doc['paymentToken'])
-    return doc
-
-def _cast_rented_event_fields(doc):
-    doc['lendingId'] = int(doc['lendingId'])
-    doc['rentDuration'] = int(doc['rentDuration'])
-    doc['rentedAt'] = int(doc['rentedAt'])
-    return doc
-
-def _cast_returned_event_fields(doc):
-    doc['lendingId'] = int(doc['lendingId'])
-    doc['returnedAt'] = int(doc['returnedAt'])
-    return doc
-
-def _cast_lending_stopped_event_fields(doc):
-    doc['lendingId'] = int(doc['lendingId'])
-    doc['stoppedAt'] = int(doc['stoppedAt'])
-    return doc
-
-def _cast_collateral_claimed_event_fields(doc):
-    doc['lendingId'] = int(doc['lendingId'])
-    doc['claimedAt'] = int(doc['claimedAt'])
-    return doc
-    
-def _parse_id(doc):
-    id = doc['_id'].split('_')
-    doc['tx_hash'] = id[0]
-    doc['tx_offset'] = id[1]
-
-    del doc['_id']
-    return doc
-
-_transform_lent_event = lambda doc: _remove_event_field(_cast_lent_event_fields(_parse_id(doc)))
-
-_transform_rented_event = lambda doc: _remove_event_field(_cast_rented_event_fields(_parse_id(doc)))
-
-_transform_returned_event = lambda doc: _remove_event_field(_cast_returned_event_fields(_parse_id(doc)))
-
-_transform_lending_stopped_event = lambda doc: _remove_event_field(_cast_lending_stopped_event_fields(_parse_id(doc)))
-
-_transform_collateral_claimed_event = lambda doc: _remove_event_field(_cast_collateral_claimed_event_fields(_parse_id(doc)))
-
 async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingId'):
     """
-    Resolve event
+    Resolves Azrael v1 event graphql query generically.
+
+    Args:
+        name (str): name of the event
+        args (Dict): Graphql function parameters specified in query
+        transformer (Callable): Callable function that map a mongodb doc to Azrael v1 event
+        sort_by (Optional[str]): Index to sort mongodv results by. Defaults to 'lendingId'
+
+    Returns:
+        List[Any]: List of Azrael v1 events.
     """
 
     limit = args['limit']
@@ -77,50 +37,66 @@ async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: O
 
     options = {'query': query, 'sort': sort, 'collation': collation}
 
-    result  = await db.get_all_items(database_name, collection_name, limit, options)
+    results  = await db.get_all_items(database_name, collection_name, limit, options)
 
-    return list(map(transformer, result))
+    return list(map(transformer, results))
 
 @Resolver("Query.getLentEvents")
 async def resolve_get_lent_events(parent, args, ctx, info):
     """
-    Get all lent events
+    Resolves 'getLentEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        LentEvent: Event instance compatible with LentEvent Graphql schema.
     """
 
-    return await resolve_event('Lent', args, _transform_lent_event)
+    return await resolve_event('Lent', args, LentEvent.from_doc)
 
 
 
 @Resolver("Query.getRentedEvents")
 async def resolve_get_rented_events(parent, args, ctx, info):
     """
-    Get all rented events
+    Resolves 'getRentedEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        RentedEvent: Event instance compatible with RentedEvent Graphql schema.
     """
-    return await resolve_event('Rented', args, _transform_rented_event)
+
+    return await resolve_event('Rented', args, RentedEvent.from_doc)
 
 
 @Resolver("Query.getReturnedEvents")
 async def resolve_get_rented_events(parent, args, ctx, info):
     """
-    Get all returned events
+    Resolves 'getReturnedEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        ReturnedEvent: Event instance compatible with ReturnedEvent Graphql schema.
     """
 
-    return await resolve_event('Returned', args, _transform_returned_event)
+    return await resolve_event('Returned', args, ReturnedEvent.from_doc)
 
 
 @Resolver("Query.getLendingStoppedEvents")
 async def resolve_get_rented_events(parent, args, ctx, info):
     """
-    Get all lending stopped events
+    Resolves 'getLendingStoppedEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        LendingStopped: Event instance compatible with LendingStopped Graphql schema.
     """
 
-    return await resolve_event('LendingStopped', args, _transform_lending_stopped_event)
+    return await resolve_event('LendingStopped', args, LendingStopped.from_doc)
 
 
 @Resolver("Query.getCollateralClaimedEvents")
 async def resolve_get_rented_events(parent, args, ctx, info):
     """
-    Get all collateral claimed events
+    Resolves 'getCollateralClaimedEvents' graphql query for the Graphql Engine.
+
+    Returns:
+        CollateralClaimed: Event instance compatible with CollateralClaimed Graphql schema.
     """
 
-    return await resolve_event('CollateralClaimed', args, _transform_collateral_claimed_event)
+    return await resolve_event('CollateralClaimed', args, CollateralClaimed.from_doc)

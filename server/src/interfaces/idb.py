@@ -8,7 +8,8 @@ together to build new proofs.
 import abc
 from typing import Any, Dict, List, Optional
 
-# todo: some of the items below can raise. Write docs for it
+# TODO: some of the items below can raise. Write docs for it
+# TODO: A lot of this code is duplicated in the indexer. Need to clean that up at some point.
 
 
 class IDB(metaclass=abc.ABCMeta):

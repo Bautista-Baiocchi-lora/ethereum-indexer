@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import asyncio
 import logging
@@ -44,16 +43,19 @@ class Server(IServer):
         
 
 def main():
+
+    log_file = "azrael.log"
+    to_serve = "azrael"
+
     logging.basicConfig(
-        filename="sylvester.log",
+        filename=log_file,
         level=logging.DEBUG,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    server = Server("sylvester", port=8080, graphiql_debug=True)
+    server = Server(to_serve, port=8080, graphiql_debug=True)
     server()
 
-    logging.debug("server started")
 
 if __name__ == "__main__":
     sys.exit(main())

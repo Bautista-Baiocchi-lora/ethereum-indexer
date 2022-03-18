@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 from interfaces.idb import IDB
 
+# TODO: A lot of this code is duplicated in the indexer. Need to clean that up at some point.
+
 load_dotenv()
 
 MONGO_URI = f"mongodb://{os.environ['MONGO_USER']}:{os.environ['MONGO_PASSWORD']}@{os.environ['MONGO_HOST']}:{os.environ['MONGO_PORT']}"
