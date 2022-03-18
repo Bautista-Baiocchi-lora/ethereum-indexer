@@ -1,4 +1,4 @@
-
+from typing import Dict, List
 
 from db import DB
 from tartiflette import Resolver
@@ -9,9 +9,12 @@ collection_name = '0xEf0182dc0574cd5874494a120750FD222FdB909a-state'
 db = DB()
 
 @Resolver("Query.kongsByAddress")
-async def resolve_get_kongs(parent, args, ctx, info):
+async def resolve_get_kongs(parent, args, ctx, info) -> Dict:
     """
-    Gets all kong ids for a given address
+    Resolves 'kongsByAddress' graphql query for the Graphql Engine.
+
+    Returns:
+        Dict: Mapping of kong id to wallet address, compatible with RKL Graphql schema.
     """
     wallet_address = args['address']
 
@@ -21,9 +24,12 @@ async def resolve_get_kongs(parent, args, ctx, info):
 
 
 @Resolver("Query.kongHolders")
-async def resolve_get_kongs(parent, args, ctx, info):    
+async def resolve_get_kongs(parent, args, ctx, info) -> List[str]:    
     """
-    Get all kong holders
+    Resolves 'kongHolders' graphql query for the Graphql Engine.
+
+    Returns:
+        List[str]: List of wallet addresses that are kong holders, compatible with RKL Graphql schema.
     """
 
     result  = await db.get_item(1, database_name, collection_name)
