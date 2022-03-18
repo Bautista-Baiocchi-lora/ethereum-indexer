@@ -50,11 +50,5 @@ def main():
     logging.info("Transformer started.")
 
 
-    extractor.join() # wait to finish
-    transformer.join() # wait to finish
-
-    logging.info("Indexer closing down...")
-
-
 if __name__ == "__main__":
     main()
