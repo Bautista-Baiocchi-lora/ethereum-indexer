@@ -1,34 +1,21 @@
 import importlib
 import logging
-import json
 import time
-import os
 
 from interfaces.itransform import ITransform
 from db import DB
+
+from config import Config
 
 SLEEP_TIMER = 10
 
 
 class Transform(ITransform):
-    def __init__(self, to_transform: str):
+    def __init__(self, config: Config):
+        self._config = config
+
         # * name of the module that will perform transforming
-        self._to_transform = to_transform
-
-        # ! transformers should always have a config.json inside
-        # ! that describes the address to transform, as well as,
-        # ! supported events
-        config_path = os.path.join(
-            os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
-            "transformers",
-            self._to_transform,
-            "config.json",
-        )
-
-        # * 1. information about what address to transform
-        # * 2. information about events are handled
-        with open(config_path, encoding="utf-8") as f:
-            self._config = json.loads(f.read())
+        self._to_transform = self._config.get_transformer_name()
 
         # todo: validate that the address in config is valid
         # todo: validate that the address is being scraped (i.e. is in the db)
@@ -42,9 +29,7 @@ class Transform(ITransform):
         transformer_module = importlib.import_module(full_module_name)
         # this implies that every transformer will take the address it transforms
         # as a constructor argument
-        self._transformer = transformer_module.Transformer(
-            self._get_address_from_config()
-        )
+        self._transformer = transformer_module.Transformer(self._config.get_address())
 
         self._db_name = "ethereum-indexer"
 
@@ -71,14 +56,11 @@ class Transform(ITransform):
         self.__dict__[key] = value
 
     def _get_state_collection_name(self) -> str:
-        # todo: will be more than one address later
-        return f"{self._get_address_from_config()}-state"
-
-    def _get_address_from_config(self) -> str:
-        return self._config["address"][0]
+        # !: will be more than one address later
+        return f"{self._config.get_address()}-state"
 
     def _get_block_height_collection_name(self) -> str:
-        return f"{self._get_address_from_config()}-block-height-state"
+        return f"{self._config.get_address()}-block-height-state"
 
     def _determine_block_height(self) -> None:
         """
@@ -96,6 +78,7 @@ class Transform(ITransform):
 
         self._block_height = block_height_item["block_height"]
 
+    # todo: func docs
     def _update_block_height(self, new_block_height: int) -> None:
         """
         Args:
@@ -116,7 +99,7 @@ class Transform(ITransform):
 
         raw_transactions = self._db.get_all_items(
             self._db_name,
-            self._get_address_from_config(),
+            self._config.get_address(),
             {
                 "query_clause": {"block_height": {"$gt": self._block_height}},
                 "sort": {"sort_by": "block_height", "direction": 1},

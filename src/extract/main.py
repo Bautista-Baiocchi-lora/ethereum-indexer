@@ -5,6 +5,8 @@ from interfaces.iextract import IExtract
 from db import DB
 from extract.covalent import Covalent
 
+from config import Config
+
 # todo: eventually would want each extractor running in its own process
 # for now the solution around that would be to simply run this pipeline
 # multiple times
@@ -13,20 +15,22 @@ EXTRACT_SLEEP_TIME = 15  # in seconds
 
 
 class Extract(IExtract):
-    def __init__(self, address: str):
+    def __init__(self, config: Config):
         """
         Args:
             address (str): address for which to extract the raw historical
         transaction data.
         """
 
+        self._config = config
+
         # TODO: validate to ensure that this address is not in the db
 
-        self._address: str = address
+        self._address: str = self._config.get_address()
         # block number up to which the extraction has happened
         self._block_height: int = 0
 
-        self._covalent = Covalent()
+        self._covalent = Covalent(self._config.get_network_id())
 
         self._db_name = "ethereum-indexer"
 
@@ -39,7 +43,7 @@ class Extract(IExtract):
         # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
 
         # re-setting the _address, _db_name, _db, _load is not allowed
-        forbid_reset_on = ["_address", "_db_name", "_db"]
+        forbid_reset_on = ["_config", "_address", "_db_name", "_db"]
         for k in forbid_reset_on:
             if key == k and hasattr(self, k):
                 raise AttributeError(

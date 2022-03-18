@@ -4,6 +4,7 @@ import logging
 
 from extract.main import Extract
 from transform.main import Transform
+from config import Config
 
 
 def main():
@@ -11,35 +12,20 @@ def main():
     One for extraction, and one for transforming.
     """
 
-    # log_filename = "example_rumble_kong_league.log"
-    log_filename = "rkl_club_auction.log"
+    config = Config.rkl_club_auction()
 
     logging.basicConfig(
-        filename=log_filename,
+        filename=config.get_log_filename(),
         level=logging.DEBUG,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    # to_transform = "example_rumble_kong_league"
-    to_transform = "rkl_club_auction"
-
-    # rkl is the main rumble kong league collection
-    # azrael is renft's v1 collateral solution
-    # sylvester is renft's v1 collateral free solution
-    # renft is a leading p2p nft rentals protocol
-    # address = "0xEf0182dc0574cd5874494a120750FD222FdB909a"
-    address = "0xa10bEa6303E89225D6fA516594632DddB6FBF3b5"
-
-    # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
-    # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
-    # "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a",  # sylvester
-
     def extract_and_load():
-        extract = Extract(address)
+        extract = Extract(config.get_address())
         extract()
 
     def transform_and_load():
-        transform = Transform(to_transform)
+        transform = Transform(config.get_transformer_name())
         transform()
 
     # todo: graceful keyboard interrupt

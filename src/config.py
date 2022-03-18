@@ -12,6 +12,26 @@ class Config:
         self._transformer_name = transformer_name
         self._network_id = network_id
 
+    # Protecc the private attributes
+
+    def __setattr__(self, key, value):
+        # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
+
+        forbid_reset_on = [
+            "_address",
+            "_log_filename",
+            "_transformer_name",
+            "_network_id",
+        ]
+        for k in forbid_reset_on:
+            if key == k and hasattr(self, k):
+                raise AttributeError(
+                    "The value of the address attribute has already been set,"
+                    " and can not be re-set."
+                )
+
+        self.__dict__[key] = value
+
     # Getters for the private attributes
 
     def get_address(self) -> str:
