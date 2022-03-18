@@ -4,8 +4,8 @@ import pymongo
 from db import DB
 from tartiflette import Resolver
 
-from sylvester.event import (Event, LendEvent, RentClaimedEvent, RentEvent,
-                             StopLendEvent, StopRentEvent)
+from sylvester.event import (LendEvent, RentClaimedEvent, RentEvent,
+                             StopLendEvent, StopRentEvent, SylvesterEvent)
 
 database_name = 'ethereum-indexer'
 collection_name = '0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a-state'
@@ -13,7 +13,8 @@ collection_name = '0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a-state'
 db = DB()
 
 # TODO: This method is almost identical to one inside azrael.query_resolver
-async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingID') -> List[Event]:
+async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingID'
+    ) -> List[SylvesterEvent]:
     """
     Resolves Sylveser v1 event graphql query generically.
 

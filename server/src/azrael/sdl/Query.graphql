@@ -10,13 +10,13 @@ enum EventType {
 }
 
 interface Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
 }
 
 type Lent implements Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
   nftAddress: String!
   tokenId: String!
   lentAmount: Int!
@@ -30,8 +30,8 @@ type Lent implements Event {
 }
 
 type Rented implements Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
   lendingId: Int!
   renterAddress: String!
   rentDuration: Int!
@@ -39,22 +39,22 @@ type Rented implements Event {
 }
 
 type Returned implements Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
   lendingId: Int!
   returnedAt: Int!
 }
 
 type LendingStopped implements Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
   lendingId: Int!
   stoppedAt: Int!
 }
 
 type CollateralClaimed implements Event {
-  tx_hash: String!
-  tx_offset: Int!
+  txHash: String!
+  txOffset: Int!
   lendingId: Int!
   claimedAt: Int!
 }

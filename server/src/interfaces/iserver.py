@@ -36,6 +36,7 @@ import abc
 
 
 class IServer(metaclass=abc.ABCMeta):
+    #pylint: disable=missing-class-docstring
 
     @abc.abstractmethod
     def start(self) -> None:

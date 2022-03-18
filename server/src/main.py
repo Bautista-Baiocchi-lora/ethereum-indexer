@@ -12,8 +12,10 @@ from interfaces.iserver import IServer
 
 
 class Server(IServer):
+    """@inheritdoc"""
 
-    def __init__(self, to_serve: str, host: Optional[str] = "0.0.0.0", port: Optional[int] = 8080, graphiql_debug: Optional[bool] = False):
+    def __init__(self, to_serve: str, host: Optional[str] = "0.0.0.0", port: Optional[int] = 8080, 
+        graphiql_debug: Optional[bool] = False) -> None:
         self.to_serve = to_serve
         self.host = host
         self.graphiql_debug = graphiql_debug
@@ -40,9 +42,9 @@ class Server(IServer):
         # Bind aiohttp to asyncio
         web.run_app(app, host=self.host, port=self.port)
         return 0
-        
 
 def main():
+    """Graphql Server Entrypoint"""
 
     log_file = "sylvester.log"
     to_serve = "sylvester"

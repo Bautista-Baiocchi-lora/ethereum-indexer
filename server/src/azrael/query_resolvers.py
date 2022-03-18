@@ -1,19 +1,22 @@
+"""Azrael v1 Graphql query resolver"""
+
 from typing import Callable, Dict, List, Optional
 
 import pymongo
 from db import DB
 from tartiflette import Resolver
 
-from azrael.event import (CollateralClaimed, Event, LendingStopped, LentEvent,
-                          RentedEvent, ReturnedEvent)
+from event import (AzraelEvent, CollateralClaimedEvent, LendingStoppedEvent,
+                   LentEvent, RentedEvent, ReturnedEvent)
 
-database_name = 'ethereum-indexer'
-collection_name = '0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7-state'
+DATABASE_NAME = 'ethereum-indexer'
+COLLECTION_NAME = '0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7-state'
 
 db = DB()
 
 # TODO: This method is almost identical to one inside sylvester.query_resolver
-async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingId') -> List[Event]:
+async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: Optional[str] = 'lendingId'
+    ) -> List[AzraelEvent]:
     """
     Resolves Azrael v1 event graphql query generically.
 
@@ -38,12 +41,12 @@ async def resolve_event(name: str, args: Dict, transformer: Callable, sort_by: O
 
     options = {'query': query, 'sort': sort, 'collation': collation}
 
-    results  = await db.get_all_items(database_name, collection_name, limit, options)
+    results  = await db.get_all_items(DATABASE_NAME, COLLECTION_NAME, limit, options)
 
     return list(map(transformer, results))
 
 @Resolver("Query.getLentEvents")
-async def resolve_get_lent_events(parent, args, ctx, info) -> List[LentEvent]:
+async def resolve_get_lent_events(_parent, args, _ctx, _info) -> List[LentEvent]:
     """
     Resolves 'getLentEvents' graphql query for the Graphql Engine.
 
@@ -56,7 +59,7 @@ async def resolve_get_lent_events(parent, args, ctx, info) -> List[LentEvent]:
 
 
 @Resolver("Query.getRentedEvents")
-async def resolve_get_rented_events(parent, args, ctx, info) -> List[RentedEvent]:
+async def resolve_get_rented_events(_parent, args, _ctx, _info) -> List[RentedEvent]:
     """
     Resolves 'getRentedEvents' graphql query for the Graphql Engine.
 
@@ -68,7 +71,7 @@ async def resolve_get_rented_events(parent, args, ctx, info) -> List[RentedEvent
 
 
 @Resolver("Query.getReturnedEvents")
-async def resolve_get_rented_events(parent, args, ctx, info) -> List[ReturnedEvent]:
+async def resolve_get_returned_events(_parent, args, _ctx, _info) -> List[ReturnedEvent]:
     """
     Resolves 'getReturnedEvents' graphql query for the Graphql Engine.
 
@@ -80,24 +83,28 @@ async def resolve_get_rented_events(parent, args, ctx, info) -> List[ReturnedEve
 
 
 @Resolver("Query.getLendingStoppedEvents")
-async def resolve_get_rented_events(parent, args, ctx, info) -> List[LendingStopped]:
+async def resolve_get_lending_stopped_events(_parent, args, _ctx, _info
+    ) -> List[LendingStoppedEvent]:
     """
     Resolves 'getLendingStoppedEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[LendingStopped]: Event instance compatible with LendingStopped Azrael Graphql schema.
+        List[LendingStoppedEvent]: Event instance compatible with LendingStopped
+        Azrael Graphql schema.
     """
 
-    return await resolve_event('LendingStopped', args, LendingStopped.from_doc)
+    return await resolve_event('LendingStopped', args, LendingStoppedEvent.from_doc)
 
 
 @Resolver("Query.getCollateralClaimedEvents")
-async def resolve_get_rented_events(parent, args, ctx, info) -> List[CollateralClaimed]:
+async def resolve_get_collateral_claimed_events(_parent, args, _ctx, _info
+    ) -> List[CollateralClaimedEvent]:
     """
     Resolves 'getCollateralClaimedEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[CollateralClaimed]: Event instance compatible with CollateralClaimed Azrael Graphql schema.
+        List[CollateralClaimedEvent]: Event instance compatible with CollateralClaimed 
+        Azrael Graphql schema.
     """
 
-    return await resolve_event('CollateralClaimed', args, CollateralClaimed.from_doc)
+    return await resolve_event('CollateralClaimed', args, CollateralClaimedEvent.from_doc)

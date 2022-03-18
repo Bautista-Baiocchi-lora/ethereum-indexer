@@ -6,13 +6,14 @@ Think of this as mathematical axioms, with which you then build proofs which you
 together to build new proofs.
 """
 import abc
-from typing import List, Any, Dict, Optional
-
+from typing import Any, Dict, List, Optional
 
 # todo: some of the items below can raise. Write docs for it
 
 
 class IDB(metaclass=abc.ABCMeta):
+    #pylint: disable=missing-docstring
+
     @classmethod
     def __subclasshook__(cls, subclass):
         return (

@@ -127,7 +127,7 @@ class Extract(IExtract):
                     break
 
                 if block_height > last_block_height:
-                    txn["_id"] = txn["tx_hash"]
+                    txn["_id"] = txn["txHash"]
                     self._transactions.append(txn)
 
             if not keep_looping:

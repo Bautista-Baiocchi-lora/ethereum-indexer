@@ -1,3 +1,5 @@
+"""DB Implementation"""
+
 import os
 from typing import Any, Dict, List, Optional
 
@@ -10,9 +12,11 @@ from interfaces.idb import IDB
 
 load_dotenv()
 
+#pylint: disable=line-too-long
 MONGO_URI = f"mongodb://{os.environ['MONGO_USER']}:{os.environ['MONGO_PASSWORD']}@{os.environ['MONGO_HOST']}:{os.environ['MONGO_PORT']}"
 
 class DB(IDB):
+    """@inheritdoc"""
 
     def __init__(self):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
@@ -28,7 +32,7 @@ class DB(IDB):
 
     async def count_documents(self, database_name: str, collection_name: str, options: Optional[Dict] = None) -> int:
         cursor = self._get_collection(database_name, collection_name)
-        
+
         return await cursor.count_documents(options['query'] if 'query' in options else {})
 
 
@@ -48,7 +52,7 @@ class DB(IDB):
             if "sort" in options:
                 # [('fieldName1', pymongo.ASCENDING), ('fieldName2', pymongo.DESCENDING)]
                 cursor.sort(options["sort"])
-            
+                
             if 'collation' in options:
                 cursor.collation(options["collation"])
 

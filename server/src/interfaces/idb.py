@@ -13,6 +13,8 @@ from typing import Any, Dict, List, Optional
 
 
 class IDB(metaclass=abc.ABCMeta):
+    #pylint: disable=missing-class-docstring
+
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
@@ -22,7 +24,7 @@ class IDB(metaclass=abc.ABCMeta):
         )
 
     @abc.abstractmethod
-    def get_item(
+    async def get_item(
         self, identifier: str, database_name: str, collection_name: str
     ) -> Any:
         """_summary_
@@ -42,7 +44,7 @@ class IDB(metaclass=abc.ABCMeta):
 
 
     @abc.abstractmethod
-    def get_all_items(
+    async def get_all_items(
         self, database_name: str, collection_name: str, limit: int, options: Optional[Dict]
     ) -> List[Any]:
         """_summary_
@@ -62,7 +64,7 @@ class IDB(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count_documents(
+    async def count_documents(
         self, database_name: str, collection_name: str, options: Optional[Dict]
     ) -> int:
         """_summary_
