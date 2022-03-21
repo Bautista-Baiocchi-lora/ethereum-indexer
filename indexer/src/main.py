@@ -3,6 +3,7 @@ import logging
 import sys
 from multiprocessing import Process
 
+from config import Config
 from extract.main import Extract
 from transform.main import Transform
 
@@ -24,19 +25,21 @@ def main():
     One for extraction, and one for transforming.
     """
 
+    config = Config.rkl_club_auction()
+
     logging.basicConfig(
-        filename="sylvester-1.0.0.log",
+        filename=config.get_log_filename(),
         level=logging.INFO,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    to_transform = "azrael"
+    to_transform = config.get_transformer_name()
 
     # rkl is the main rumble kong league collection
     # azrael is renft's v1 collateral solution
     # sylvester is renft's v1 collateral free solution
     # renft is a leading p2p nft rentals protocol
-    address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
+    address = config.get_address()
 
     # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
