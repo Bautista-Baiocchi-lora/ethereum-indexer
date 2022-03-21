@@ -12,8 +12,6 @@ from typing import Any, Dict, List, Optional
 
 
 class IDB(metaclass=abc.ABCMeta):
-    #pylint: disable=missing-docstring
-
     @classmethod
     def __subclasshook__(cls, subclass):
         return (

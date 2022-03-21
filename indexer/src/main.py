@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 import logging
+import sys
 from multiprocessing import Process
 
 from extract.main import Extract
 from transform.main import Transform
 
 
-def extract_and_load(address:str) -> None:
+def extract_and_load(address: str) -> None:
+    """Initiate and start extractor"""
+
     extract = Extract(address)
     extract()
 
-def transform_and_load(to_transform:str) -> None:
+def transform_and_load(to_transform: str) -> None:
+    """Initiate and start transform"""
+
     transform = Transform(to_transform)
     transform()
 
@@ -20,18 +25,18 @@ def main():
     """
 
     logging.basicConfig(
-        filename="example_rumble_kong_league.log",
-        level=logging.DEBUG,
+        filename="sylvester-1.0.0.log",
+        level=logging.INFO,
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    to_transform = "example_rumble_kong_league"
+    to_transform = "azrael"
 
     # rkl is the main rumble kong league collection
     # azrael is renft's v1 collateral solution
     # sylvester is renft's v1 collateral free solution
     # renft is a leading p2p nft rentals protocol
-    address = "0xEf0182dc0574cd5874494a120750FD222FdB909a"
+    address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
 
     # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
@@ -50,5 +55,10 @@ def main():
     logging.info("Transformer started.")
 
 
+    extractor.join() # wait to finish
+    transformer.join() # wait to finish
+
+
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
