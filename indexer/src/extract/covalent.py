@@ -31,6 +31,8 @@ REQUEST_TRANSACTIONS_SLEEP = 5  # in seconds
 
 
 class Covalent:
+    """Client for interacting with Covalent API"""
+
     def __init__(self, network_id: int):
         self._network_id = network_id
 

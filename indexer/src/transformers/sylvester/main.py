@@ -23,7 +23,9 @@ Event = lambda name, txn_hash, fields, values: dict(zip(['event', '_id', *fields
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    def __init__(self, address: str, events: List[str]):
+    """ReNFT Sylvester v1 Transformer"""
+
+    def __init__(self, address: str):
 
         self._address = address
 
@@ -31,7 +33,7 @@ class Transformer:
 
         self._db_name = "ethereum-indexer"
         self._collection_name = f"{address}-state"
-        self._events_of_interest = events
+        self._events_of_interest = ["Lend", "Rent", "StopLend", "StopRent", "RentClaimed"]
 
         self._flush_state = False
 
@@ -158,6 +160,7 @@ def hex_to_int(s):
 def bytes_to_int(x):
     return int.from_bytes(x, byteorder='big', signed=False)
 
+# TODO: move this to a seperate pypy package
 def unpack_price(s):
     # Covalent returns bytes4 types encoded in base64
     s = base64.b64decode(s).hex().upper() # decode into hex

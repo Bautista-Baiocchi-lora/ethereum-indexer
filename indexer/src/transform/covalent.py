@@ -5,6 +5,7 @@ from extract.covalent import Covalent as Covalent_
 
 
 class Covalent(Covalent_):
+    """@inheritdoc"""
 
     # todo: better txn type
     @staticmethod

@@ -9,7 +9,9 @@ from transform.covalent import Covalent
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    def __init__(self, address: str,  events: List[str]):
+    """RKL Kong Holder Transformer"""
+
+    def __init__(self, address: str):
 
         self._address = address
 
@@ -17,7 +19,7 @@ class Transformer:
 
         self._db_name = "ethereum-indexer"
         self._collection_name = f"{address}-state"
-        self._events_of_interest = events
+        self._events_of_interest = ["Transfer"]
 
         self._flush_state = False
 

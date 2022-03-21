@@ -1,12 +1,11 @@
 import logging
 import time
 
+from config import Config
 from db import DB
 from interfaces.iextract import IExtract
 
 from extract.covalent import Covalent
-
-from config import Config
 
 # todo: eventually would want each extractor running in its own process
 # for now the solution around that would be to simply run this pipeline
@@ -16,6 +15,8 @@ EXTRACT_SLEEP_TIME = 15 # in seconds
 
 
 class Extract(IExtract):
+    """@inheritdoc"""
+
     def __init__(self, config: Config):
         """
         Args:

@@ -25,7 +25,7 @@ def main():
     One for extraction, and one for transforming.
     """
 
-    config = Config.rkl_club_auction()
+    config = Config.example_rumble_kong_league()
 
     logging.basicConfig(
         filename=config.get_log_filename(),
@@ -33,13 +33,10 @@ def main():
         format="%(relativeCreated)6d %(process)d %(message)s",
     )
 
-    to_transform = config.get_transformer_name()
-
     # rkl is the main rumble kong league collection
     # azrael is renft's v1 collateral solution
     # sylvester is renft's v1 collateral free solution
     # renft is a leading p2p nft rentals protocol
-    address = config.get_address()
 
     # "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7",  # azrael
     # "0xEf0182dc0574cd5874494a120750FD222FdB909a",  # rkl
@@ -47,8 +44,8 @@ def main():
 
 
     # todo: graceful keyboard interrupt
-    extractor = Process(target=extract_and_load, args=[address])
-    transformer = Process(target=transform_and_load, args=[to_transform])
+    extractor = Process(target=extract_and_load, args=[config])
+    transformer = Process(target=transform_and_load, args=[config])
 
 
     extractor.start()

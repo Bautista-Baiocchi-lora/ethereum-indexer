@@ -1,7 +1,7 @@
 import logging
-from eth_abi import decode_single
 
 from db import DB
+from eth_abi import decode_single
 
 # ! this code is taken from: https://github.com/rumble-kong-league/club-nft-auction
 # ! they should be exactly the same
@@ -13,6 +13,8 @@ PLACE_BID_EVENT = "0xe694ab314354b7ccad603c48b44dce6ade8b6a57cbebaa8842edd9a2fb2
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
+    """RKL Club Auction Transformer"""
+    
     def __init__(self, address: str):
 
         self._address = address

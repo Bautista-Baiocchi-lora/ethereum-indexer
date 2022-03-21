@@ -32,7 +32,7 @@ class Transform(ITransform):
 
         # this implies that every transformer will take the address it transforms
         # as a constructor argument
-        self._transformer = transformer_module.Transformer(self._config.get_address(), [])
+        self._transformer = transformer_module.Transformer(self._config.get_address())
 
         self._db_name = "ethereum-indexer"
 
