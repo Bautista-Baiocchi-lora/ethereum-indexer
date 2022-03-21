@@ -8,12 +8,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ETHEREUM_MAINNET_CHAIN_ID = 1
+# ETHEREUM_KOVAN_CHAIN_ID = 42
+
 # * notes
 # - possible to pull from a different blockchain if `chain_id` is different
 # - `block_signed_at=false` pulls all transactions putting most recent ones
 # at the top
-COVALENT_TRANSACTIONS_URI = lambda address, page_number: (
-    "https://api.covalenthq.com/v1/1/address/"
+COVALENT_TRANSACTIONS_URI = lambda address, page_number, network_id: (
+    f"https://api.covalenthq.com/v1/{network_id}/address/"
     + str(address)
     + "/transactions_v2/?quote-currency=USD"
     + "&format=JSON&block-signed-at-asc=false"
@@ -28,6 +31,11 @@ REQUEST_TRANSACTIONS_SLEEP = 5  # in seconds
 
 
 class Covalent:
+    """Client for interacting with Covalent API"""
+
+    def __init__(self, network_id: int):
+        self._network_id = network_id
+
     @staticmethod
     def _validate_transactions_response(response: Dict[str, Any]) -> None:
         """_summary_
@@ -111,7 +119,9 @@ class Covalent:
             f"Extracting for: {for_address}, covalent page number: {page_number}"
         )
 
-        request_uri = COVALENT_TRANSACTIONS_URI(for_address, page_number)
+        request_uri = COVALENT_TRANSACTIONS_URI(
+            for_address, page_number, self._network_id
+        )
 
         response = requests.get(request_uri)
 
