@@ -1,3 +1,4 @@
+import base64
 from typing import Dict, List
 
 from extract.covalent import Covalent as Covalent_
@@ -33,6 +34,8 @@ class Covalent(Covalent_):
 
                 if decoded_param["type"] == "uint256":
                     decoded.append(int(raw_param, 16))
-                # todo: other types
+                else:
+                    raise NotImplementedError(f'Undecoded convalent param: {decoded_param["type"]}')
 
         return decoded
+

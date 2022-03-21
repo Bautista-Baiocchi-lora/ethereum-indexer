@@ -1,11 +1,12 @@
 import importlib
-import logging
 import json
-import time
+import logging
 import os
+import time
+from typing import List
 
-from interfaces.itransform import ITransform
 from db import DB
+from interfaces.itransform import ITransform
 
 SLEEP_TIMER = 10
 
@@ -40,10 +41,13 @@ class Transform(ITransform):
 
         full_module_name = f"transformers.{self._to_transform}.main"
         transformer_module = importlib.import_module(full_module_name)
+
         # this implies that every transformer will take the address it transforms
-        # as a constructor argument
+        # and events of interest
+        # as a constructor arguments
         self._transformer = transformer_module.Transformer(
-            self._get_address_from_config()
+            self._get_address_from_config(),
+            self._get_events_of_interest()
         )
 
         self._db_name = "ethereum-indexer"
@@ -76,6 +80,12 @@ class Transform(ITransform):
 
     def _get_address_from_config(self) -> str:
         return self._config["address"][0]
+
+    def _get_events_of_interest(self) -> List[str]:
+        return self._get_events_from_config()
+
+    def _get_events_from_config(self) -> List[str]:
+        return self._config["events"]
 
     def _get_block_height_collection_name(self) -> str:
         return f"{self._get_address_from_config()}-block-height-state"

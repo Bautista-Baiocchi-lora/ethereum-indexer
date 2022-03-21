@@ -1,15 +1,16 @@
 import logging
 import time
 
-from interfaces.iextract import IExtract
 from db import DB
+from interfaces.iextract import IExtract
+
 from extract.covalent import Covalent
 
 # todo: eventually would want each extractor running in its own process
 # for now the solution around that would be to simply run this pipeline
 # multiple times
 
-EXTRACT_SLEEP_TIME = 15  # in seconds
+EXTRACT_SLEEP_TIME = 15 # in seconds
 
 
 class Extract(IExtract):

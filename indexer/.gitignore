@@ -1,10 +1,7 @@
 # For dev purposes
 docker-compose.yml
 src/extract/mock.covalent.response.json
-server/.env
-indexer/.env
-
-.DS_Store
+Playground.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
