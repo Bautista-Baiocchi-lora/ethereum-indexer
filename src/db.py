@@ -8,6 +8,7 @@ from interfaces.idb import IDB
 
 load_dotenv()
 
+#pylint: disable=line-too-long
 MONGO_URI = f"mongodb://{os.environ['MONGO_USER']}:{os.environ['MONGO_PASSWORD']}@{os.environ['MONGO_HOST']}:{os.environ['MONGO_PORT']}"
 
 class DB(IDB):
@@ -22,8 +23,8 @@ class DB(IDB):
         self, items: List[Any], database_name: str, collection_name: str
     ) -> None:
         if items is None or len(items) == 0:
-            return 
-            
+            return
+
         db = self.client[database_name]
         db[collection_name].insert_many(items)
 

@@ -7,11 +7,15 @@ from extract.main import Extract
 from transform.main import Transform
 
 
-def extract_and_load(address:str) -> None:
+def extract_and_load(address: str) -> None:
+    """Initiate and start extractor"""
+
     extract = Extract(address)
     extract()
 
-def transform_and_load(to_transform:str) -> None:
+def transform_and_load(to_transform: str) -> None:
+    """Initiate and start transform"""
+
     transform = Transform(to_transform)
     transform()
 
@@ -54,7 +58,6 @@ def main():
     extractor.join() # wait to finish
     transformer.join() # wait to finish
 
-    logging.info("Indexer closing down...")
 
 
 if __name__ == "__main__":

@@ -50,7 +50,8 @@ class IDB(metaclass=abc.ABCMeta):
             database_name (str): _description_
             collection_name (str): _description_
         """
-        raise NotImplementedError
+        for item in items:
+            self.put_item(item, database_name, collection_name)
 
     @abc.abstractmethod
     def get_item(
