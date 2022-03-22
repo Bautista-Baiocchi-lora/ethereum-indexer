@@ -46,8 +46,8 @@ class Server(IServer):
 def main():
     """Graphql Server Entrypoint"""
 
-    log_file = "sylvester.log"
-    to_serve = "sylvester"
+    log_file = "sylvester_v1.log"
+    to_serve = "sylvester_v1"
 
     logging.basicConfig(
         filename=log_file,

@@ -25,7 +25,7 @@ def main():
     One for extraction, and one for transforming.
     """
 
-    config = Config.example_rumble_kong_league()
+    config = Config.sylvester_v1()
 
     logging.basicConfig(
         filename=config.get_log_filename(),
