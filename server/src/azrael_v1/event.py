@@ -73,19 +73,13 @@ class LentEvent(AzraelEvent):
 
         txHash, txOffset = AzraelEvent.parse_id(doc['_id'])
 
+        del doc['_id']
+        del doc['event']
+
         return cls(
             txHash,
             txOffset,
-            lendingId=int(doc['lendingId']), 
-            lentAmount=int(doc['lentAmount']), 
-            maxRentDuration=int(doc['maxRentDuration']),
-            paymentToken=int(doc['paymentToken']),
-            nftAddress=doc['nftAddress'],
-            tokenId=doc['tokenId'],
-            lendersAddress=doc['lendersAddress'],
-            dailyRentPrice=doc['dailyRentPrice'],
-            nftPrice=doc['nftPrice'],
-            isERC721=doc['isERC721'],
+            **doc
             )
 
 
@@ -118,13 +112,13 @@ class RentedEvent(AzraelEvent):
 
         txHash, txOffset = AzraelEvent.parse_id(doc['_id'])
 
+        del doc['_id']
+        del doc['event']
+
         return cls(
             txHash,
             txOffset,
-            lendingId=int(doc['lendingId']),
-            renterAddress=doc['renterAddress'],
-            rentDuration=int(doc['rentDuration']),
-            rentedAt=int(doc['rentedAt'])
+            **doc
         )
 
 
@@ -158,8 +152,8 @@ class ReturnedEvent(AzraelEvent):
         return cls(
             txHash,
             txOffset,
-            lendingId=int(doc['lendingId']),
-            returnedAt=int(doc['returnedAt'])
+            lendingId=doc['lendingId'],
+            returnedAt=doc['returnedAt']
         )
 
 @dataclass
@@ -192,8 +186,8 @@ class LendingStoppedEvent(AzraelEvent):
         return cls(
             txHash,
             txOffset,
-            lendingId=int(doc['lendingId']),
-            stoppedAt=int(doc['stoppedAt'])
+            lendingId=doc['lendingId'],
+            stoppedAt=doc['stoppedAt']
         )
 
 @dataclass
@@ -226,6 +220,6 @@ class CollateralClaimedEvent(AzraelEvent):
         return cls(
             txHash,
             txOffset,
-            lendingId=int(doc['lendingId']),
-            claimedAt=int(doc['claimedAt'])
+            lendingId=doc['lendingId'],
+            claimedAt=doc['claimedAt']
         )

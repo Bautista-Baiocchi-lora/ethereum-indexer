@@ -72,18 +72,13 @@ class LendEvent(SylvesterEvent):
 
         txHash, txOffset = SylvesterEvent.parse_id(doc['_id'])
 
+        del doc['_id']
+        del doc['event']
+
         return cls(
             txHash,
             txOffset,
-            lendingID=int(doc['lendingID']), 
-            lenderAddress=doc['lenderAddress'],
-            nftAddress=doc['nftAddress'],
-            tokenID=doc['tokenID'],
-            maxRentDuration=int(doc['maxRentDuration']),
-            dailyRentPrice=doc['dailyRentPrice'],
-            lendAmount=int(doc['lendAmount']),
-            paymentToken=int(doc['paymentToken']),
-            is721=doc['is721']
+            **doc
             )
 
 
@@ -118,15 +113,13 @@ class RentEvent(SylvesterEvent):
 
         txHash, txOffset = SylvesterEvent.parse_id(doc['_id'])
 
+        del doc['_id']
+        del doc['event']
+
         return cls(
             txHash,
             txOffset,
-            lendingID=int(doc['lendingID']),
-            renterAddress=doc['renterAddress'],
-            rentDuration=int(doc['rentDuration']),
-            rentAmount=int(doc['rentAmount']),
-            rentingID=int(doc['rentingID']),
-            rentedAt=int(doc['rentedAt'])
+            **doc
         )
 
 
@@ -160,8 +153,8 @@ class StopRentEvent(SylvesterEvent):
         return cls(
             txHash,
             txOffset,
-            rentingID=int(doc['rentingID']),
-            stoppedAt=int(doc['stoppedAt'])
+            rentingID=doc['rentingID'],
+            stoppedAt=doc['stoppedAt']
         )
 
 @dataclass
@@ -194,8 +187,8 @@ class StopLendEvent(SylvesterEvent):
         return cls(
             txHash,
             txOffset,
-            lendingID=int(doc['lendingID']),
-            stoppedAt=int(doc['stoppedAt'])
+            lendingID=doc['lendingID'],
+            stoppedAt=doc['stoppedAt']
         )
 
 @dataclass
@@ -228,8 +221,6 @@ class RentClaimedEvent(SylvesterEvent):
         return cls(
             txHash,
             txOffset,
-            rentingID=int(doc['rentingID']),
-            collectedAt=int(doc['collectedAt'])
+            rentingID=doc['rentingID'],
+            collectedAt=doc['collectedAt']
         )
-
-
