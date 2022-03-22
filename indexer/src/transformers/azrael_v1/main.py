@@ -1,22 +1,12 @@
 import base64
 import logging
-from typing import List
+from typing import Any, List
 
 from db import DB
 from transform.covalent import Covalent
-
-_LENT_FIELDS  = ["nftAddress", "tokenId", "lentAmount", "lendingId", "lendersAddress",
-        "maxRentDuration", "dailyRentPrice", "nftPrice", "isERC721", "paymentToken"]
-
-_RENTED_FIELDS = ["lendingId", "renterAddress", "rentDuration", "rentedAt"]
-
-_RETURNED_FIELDS = ["lendingId", "returnedAt"]
-
-_LENDING_STOPPED_FIELDS =  ["lendingId", "stoppedAt"]
-
-_COLLATERAL_CLAIMED_FIELDS = ["lendingId", "claimedAt"]
-
-Event = lambda name, txn_hash, fields, values: dict(zip(['event', '_id', *fields], [name, txn_hash, *values]))
+from transformers.azrael_v1.event import (AzraelEvent, CollateralClaimedEvent,
+                                          LendingStoppedEvent, LentEvent,
+                                          RentedEvent, ReturnedEvent)
 
 
 # todo: needs to inherit an interface that implements flush
@@ -75,19 +65,17 @@ class Transformer:
             # events: Rented, Lent, CollateralClaimed, LendingStopped, Returned
             if event["decoded"]["name"] in self._events_of_interest:
                 decoded_params = Covalent.decode(event)
-                # unique identifier
-                tx_hash = f"{event['tx_hash']}_{event['log_offset']}"
-
+               
                 if event["decoded"]["name"] == "Rented":
-                    self._on_rented(decoded_params, tx_hash)
+                    self._on_rented(event, decoded_params)
                 elif event["decoded"]["name"] == "Lent":
-                    self._on_lent(decoded_params, tx_hash)
+                    self._on_lent(event, decoded_params)
                 elif event["decoded"]["name"] == "Returned":
-                    self._on_returned(decoded_params, tx_hash)
+                    self._on_returned(event, decoded_params)
                 elif event["decoded"]["name"] == "LendingStopped":
-                    self._on_lending_stopped(decoded_params, tx_hash)
+                    self._on_lending_stopped(event, decoded_params)
                 elif event["decoded"]["name"] == "CollateralClaimed":
-                    self._on_collateral_claim(decoded_params, tx_hash)
+                    self._on_collateral_claim(event, decoded_params)
                 
             logging.info(event)
 
@@ -117,57 +105,37 @@ class Transformer:
             self._db.put_items(self._transformed, self._db_name, self._collection_name)
             self._flush_state = False
 
-    def _on_collateral_claim(self, decoded_params, tx_hash: str) -> None:
+    def _add_transformed(self, event: AzraelEvent) -> None:
+        self._transformed.append(event.to_dict())
+
+    def _on_collateral_claim(self, event: Any, decoded_params: List[Any]) -> None:
         # CollateralClaimed(indexed uint256 lendingId, uint32 claimedAt)
 
-        self._transformed.append(Event('CollateralClaimed', tx_hash, _COLLATERAL_CLAIMED_FIELDS, decoded_params))
+        self._add_transformed(CollateralClaimedEvent.from_covalent(event, decoded_params))
 
-    def _on_lending_stopped(self, decoded_params, tx_hash: str) -> None:
+    def _on_lending_stopped(self, event: Any, decoded_params: List[Any]) -> None:
         # LendingStopped(indexed uint256 lendingId, uint32 stoppedAt)
 
-        self._transformed.append(Event('LendingStopped', tx_hash, _LENDING_STOPPED_FIELDS, decoded_params))
+        self._add_transformed(LendingStoppedEvent.from_covalent(event, decoded_params))
 
-    def _on_returned(self, decoded_params, tx_hash: str) -> None:
+    def _on_returned(self, event: Any, decoded_params: List[Any]) -> None:
         # Returned(indexed uint256 lendingId, uint32 returnedAt)
 
-        self._transformed.append(Event('Returned',tx_hash,  _RETURNED_FIELDS, decoded_params))
+        self._add_transformed(ReturnedEvent.from_covalent(event, decoded_params))
 
-    def _on_rented(self, decoded_params, tx_hash: str) -> None:
+    def _on_rented(self,  event: Any, decoded_params: List[Any]) -> None:
         # Rented(uint256 lendingId, indexed address renterAddress, uint8 rentDuration, uint32 rentedAt)
 
-        self._transformed.append(Event('Rented', tx_hash, _RENTED_FIELDS, decoded_params))
+        self._add_transformed(RentedEvent.from_covalent(event, decoded_params))
 
-    def _on_lent(self, decoded_params, tx_hash: str) -> None:
+    # TODO: typing for event
+    def _on_lent(self, event: Any, decoded_params: List[Any]) -> None:
         # Lent(indexed address nftAddress, indexed uint256 tokenId, uint8 lentAmount, uint256 lendingId,
         # indexed address lenderAddress, uint8 maxRentDuration, bytes4 dailyRentPrice,
         # bytes4 nftPrice, bool isERC721, uint8 paymentToken)
 
-        event = Event('Lent', tx_hash, _LENT_FIELDS, decoded_params)
-        event['dailyRentPrice'] = unpack_price(event['dailyRentPrice'])
-        event['nftPrice'] = unpack_price(event['nftPrice'])
+        self._add_transformed(LentEvent.from_covalent(event, decoded_params))
 
-        self._transformed.append(event)
-
-
-def hex_to_int(s):
-    return int(s, 16)
-
-def bytes_to_int(x):
-    return int.from_bytes(x, byteorder='big', signed=False)
-
-# TODO: move this to a seperate pypy package
-def unpack_price(s):
-    # Covalent returns bytes4 types encoded in base64
-    s = base64.b64decode(s).hex().upper() # decode into hex
-    whole_hex = s[:4]
-    decimal_hex = s[4:]
-
-    whole = hex_to_int(whole_hex)
-    decimal = hex_to_int(decimal_hex)
-    
-    # shift right, round to 4 decimal places 
-    decimal = round(decimal * 10**-4 , 4)
-    return whole + decimal
 
 # todo: do not save empty lists
 # todo: block height state is incorrect

@@ -77,6 +77,50 @@ class Config:
     # Presets
 
     @classmethod
+    def sylvester_v1(cls):
+        """
+        Returns instance of an sylvester v1
+        indexer and transformer. It collects all the raw
+        transactions from sylvester v1 and transforms them such that
+        you can know all of the on-chain emitted events.
+
+        Network: Ethereum Mainnet.
+
+        Returns:
+            _type_: instance of this class with the correct
+            configs.
+        """
+
+        address = "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a"
+        log_filename = "sylvester_v1.log"
+        transformer_name = "sylvester_v1"
+        network_id = 1
+
+        return cls(address, log_filename, transformer_name, network_id)
+
+    @classmethod
+    def azrael_v1(cls):
+        """
+        Returns instance of an azrael v1
+        indexer and transformer. It collects all the raw
+        transactions from azrael v1 and transforms them such that
+        you can know all of the on-chain emitted events.
+
+        Network: Ethereum Mainnet.
+
+        Returns:
+            _type_: instance of this class with the correct
+            configs.
+        """
+
+        address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
+        log_filename = "azrael_v1.log"
+        transformer_name = "azrael_v1"
+        network_id = 1
+
+        return cls(address, log_filename, transformer_name, network_id)
+
+    @classmethod
     def example_rumble_kong_league(cls):
         """
         Returns instance of an example_rumble_kong_league
