@@ -35,7 +35,7 @@ def main():
     One for extraction, and one for transforming.
     """
 
-    config = Config.azrael()
+    config = Config.sylvester()
 
     logging.basicConfig(
         filename=config.get_log_filename(),

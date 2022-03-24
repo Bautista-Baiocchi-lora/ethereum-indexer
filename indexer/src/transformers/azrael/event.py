@@ -96,7 +96,7 @@ class LentEvent(AzraelEvent):
             payment_token (int): Token to be used for rental payment
 
         Returns:
-            _type_: instance of this class with the correct
+            (LentEvent): instance of this class with the correct
             configs.
         """
 
@@ -154,7 +154,7 @@ class RentedEvent(AzraelEvent):
             rented_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (RentedEvent): instance of this class with the correct
             configs.
         """
 
@@ -195,7 +195,7 @@ class ReturnedEvent(AzraelEvent):
             returned_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (ReturnedEvent): instance of this class with the correct
             configs.
         """
 
@@ -233,7 +233,7 @@ class LendingStoppedEvent(AzraelEvent):
             stopped_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (LendingStopped): instance of this class with the correct
             configs.
         """
 
@@ -271,7 +271,7 @@ class CollateralClaimedEvent(AzraelEvent):
             claimed_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (CollateralClaimed): instance of this class with the correct
             configs.
         """
 

@@ -9,8 +9,6 @@ from abc import ABC
 from dataclasses import asdict, dataclass
 from typing import Any, List, Union
 
-from transformers.sylvester.util import unpack_price
-
 ID_SEPERATOR='_'
 
 @dataclass
@@ -63,35 +61,58 @@ class LendEvent(SylvesterEvent):
     paymentToken: int
 
 
-   #TODO: Typing for event parameters
+    #TODO: Typing for event parameters
+    #pylint: disable=too-many-arguments
     @classmethod
-    def from_covalent(cls, event: Any, decoded_params: List[Any]):
+    def create(
+        cls,
+        tx_hash: str,
+        log_offset: Union[int, str],
+        is_721: bool,
+        lender_address: str,
+        nft_address: str,
+        token_id: str,
+        lending_id: int,
+        max_rent_duration: int,
+        daily_rent_price: int,
+        lend_amount: int,
+        payment_token: int
+    ):
         """
-        Parses a covalent event into a 'Lend' sylvester event.
+        Factory method for 'Lend' sylvester event.
 
         Args:
-            event (Any): a covalent event
-            decoded_params: (List[Any]): a list of decoded covalent event parameters. Order is important!
+            tx_hash (str): The hash of the transaction
+            log_offset (str): The offset of the transaction
+            nft_address (str): Address of NFT to be lent
+            token_id (str): Id of NFT being lent
+            lend_amount (int): Amount of NFT of token_id to be lent
+            lending_id (int): Id of the ReNFT lending
+            lender_address (str): Wallet address of lender
+            max_rent_duration (int): Maximum rent duration in days
+            daily_rent_price (int): Daily rental price for NFT, denominated in payment_token
+            is_721 (bool): True if NFT being lent is ERC721, False if NFT is ERC1155
+            payment_token (int): Token to be used for rental payment
 
         Returns:
-            _type_: instance of this class with the correct
+            (LendEvent): instance of this class with the correct
             configs.
         """
 
-        _id = SylvesterEvent.get_id(event['tx_hash'], event['log_offset'])
+        _id = SylvesterEvent.get_id(tx_hash, log_offset)
 
         return cls(
             _id=_id,
             event='Lend',
-            is721=decoded_params[0],
-            lenderAddress=decoded_params[1],
-            nftAddress=decoded_params[2],
-            tokenID=decoded_params[3],
-            lendingID=int(decoded_params[4]),
-            maxRentDuration=int(decoded_params[5]),
-            dailyRentPrice=unpack_price(decoded_params[6]),
-            lendAmount=int(decoded_params[7]),
-            paymentToken=int(decoded_params[8]),
+            is721=is_721,
+            lenderAddress=lender_address,
+            nftAddress=nft_address,
+            tokenID=token_id,
+            lendingID=lending_id,
+            maxRentDuration=max_rent_duration,
+            dailyRentPrice=daily_rent_price,
+            lendAmount=lend_amount,
+            paymentToken=payment_token,
         )
 
 
@@ -113,30 +134,44 @@ class RentEvent(SylvesterEvent):
 
    #TODO: Typing for event parameters
     @classmethod
-    def from_covalent(cls, event: Any, decoded_params: List[Any]):
+    def create(cls, 
+        tx_hash: str,
+        log_offset: Union[str, int],
+        lending_id: int,
+        renter_address: int,
+        renting_id: int,
+        rent_amount: int,
+        rent_duration: int,
+        rented_at: int
+        ):
         """
-        Parses a covalent event into a 'Rent' sylvester event.
+        Factory method for 'Rent' sylvester event.
 
         Args:
-            event (Any): a covalent event
-            decoded_params: (List[Any]): a list of decoded covalent event parameters. Order is important!
+            tx_hash (str): The hash of the transaction
+            log_offset (str): The offset of the transaction
+            lending_id (int): Id of the ReNFT lending
+            renting_id (int): Id of ReNFT renting
+            renter_address (str): Wallet address of renter
+            rent_duration (int): Duration of rental in days
+            rented_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (RentEvent): instance of this class with the correct
             configs.
         """
 
-        _id = SylvesterEvent.get_id(event['tx_hash'], event['log_offset'])
+        _id = SylvesterEvent.get_id(tx_hash, log_offset)
 
         return cls(
             _id=_id,
             event='Rent',
-            renterAddress=decoded_params[0],
-            lendingID=int(decoded_params[1]),
-            rentingID=int(decoded_params[2]),
-            rentAmount=int(decoded_params[3]),
-            rentDuration=int(decoded_params[4]),
-            rentedAt=int(decoded_params[5])
+            renterAddress=renter_address,
+            lendingID=lending_id,
+            rentingID=renting_id,
+            rentAmount=rent_amount,
+            rentDuration=rent_duration,
+            rentedAt=rented_at
         )
 
 
@@ -152,28 +187,30 @@ class StopRentEvent(SylvesterEvent):
     rentingID: int
     stoppedAt: int
 
-   #TODO: Typing for event parameters
+    #TODO: Typing for event parameters
     @classmethod
-    def from_covalent(cls, event: Any, decoded_params: List[Any]):
+    def create(cls, tx_hash: str, log_offset: Union[str, int], renting_id: int, stopped_at: int):
         """
-        Parses a covalent event into a 'StopRent' sylvester event.
+        Factory method for 'StopRent' sylvester event.
 
         Args:
-            event (Any): a covalent event
-            decoded_params: (List[Any]): a list of decoded covalent event parameters. Order is important!
+            tx_hash (str): The hash of the transaction
+            log_offset (str): The offset of the transaction
+            renting_id (int): Id of ReNFT renting
+            stopped_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (StopRentEvent): instance of this class with the correct
             configs.
         """
 
-        _id = SylvesterEvent.get_id(event['tx_hash'], event['log_offset'])
+        _id = SylvesterEvent.get_id(tx_hash, log_offset)
 
         return cls(
             _id=_id,
             event='StopRent',
-            rentingID=int(decoded_params[0]),
-            stoppedAt=int(decoded_params[1]),
+            rentingID=renting_id,
+            stoppedAt=stopped_at,
         )
 
 
@@ -191,26 +228,28 @@ class StopLendEvent(SylvesterEvent):
 
    #TODO: Typing for event parameters
     @classmethod
-    def from_covalent(cls, event: Any, decoded_params: List[Any]):
+    def create(cls, tx_hash: str, log_offset: Union[str, int], lending_id: int, stopped_at: int):
         """
-        Parses a covalent event into a 'StopLend' sylvester event.
+        Factory method for 'StopLend' sylvester event.
 
         Args:
-            event (Any): a covalent event
-            decoded_params: (List[Any]): a list of decoded covalent event parameters. Order is important!
+            tx_hash (str): The hash of the transaction
+            log_offset (str): The offset of the transaction
+            lending_id (int): Id of ReNFT lending
+            stopped_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (StopLendEvent): instance of this class with the correct
             configs.
         """
 
-        _id = SylvesterEvent.get_id(event['tx_hash'], event['log_offset'])
+        _id = SylvesterEvent.get_id(tx_hash, log_offset)
 
         return cls(
             _id=_id,
             event='StopLend',
-            lendingID=int(decoded_params[0]),
-            stoppedAt=int(decoded_params[1]),
+            lendingID=lending_id,
+            stoppedAt=stopped_at,
         )
 
 
@@ -228,24 +267,26 @@ class RentClaimedEvent(SylvesterEvent):
 
    #TODO: Typing for event parameters
     @classmethod
-    def from_covalent(cls, event: Any, decoded_params: List[Any]):
+    def create(cls, tx_hash: str, log_offset: Union[str, int], renting_id: int, collected_at: int):
         """
-        Parses a covalent event into a 'RentClaimed' sylvester event.
+        Factory method for 'RentClaimed' sylvester event.
 
         Args:
-            event (Any): a covalent event
-            decoded_params: (List[Any]): a list of decoded covalent event parameters. Order is important!
+            tx_hash (str): The hash of the transaction
+            log_offset (str): The offset of the transaction
+            renting_id (int): Id of ReNFT renting
+            collected_at (int): Block timestamp of the transaction
 
         Returns:
-            _type_: instance of this class with the correct
+            (RentClaimedEvent): instance of this class with the correct
             configs.
         """
 
-        _id = SylvesterEvent.get_id(event['tx_hash'], event['log_offset'])
+        _id = SylvesterEvent.get_id(tx_hash, log_offset)
 
         return cls(
             _id=_id,
             event='RentClaimed',
-            rentingID=int(decoded_params[0]),
-            collectedAt=int(decoded_params[1]),
+            rentingID=renting_id,
+            collectedAt=collected_at,
         )
