@@ -1,5 +1,5 @@
 # For dev purposes
-docker-compose.yml
+docker-bauti-compose.yml
 src/extract/mock.covalent.response.json
 server/.env
 indexer/.env

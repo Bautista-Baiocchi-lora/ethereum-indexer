@@ -4,16 +4,17 @@ from typing import Any, List
 
 from db import DB
 from transform.covalent import Covalent
-from transformers.sylvester_v1.event import (LendEvent, RentClaimedEvent,
-                                             RentEvent, StopLendEvent,
-                                             StopRentEvent, SylvesterEvent)
+from transformers.sylvester.event import (LendEvent, RentClaimedEvent,
+                                          RentEvent, StopLendEvent,
+                                          StopRentEvent, SylvesterEvent)
+from transformers.sylvester.util import unpack_price
 
 
 # todo: needs to inherit an interface that implements flush
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    """ReNFT Sylvester v1 Transformer"""
+    """ReNFT sylvester Transformer"""
 
     def __init__(self, address: str):
 
@@ -111,29 +112,75 @@ class Transformer:
     def _on_rent_claimed(self, event: Any, decoded_params: List[Any]) -> None:
         # RentClaimed(uint256 indexed rentingID, uint32 collectedAt)
 
-        self._add_transformed(RentClaimedEvent.from_covalent(event, decoded_params))
+        event = RentClaimedEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            renting_id=int(decoded_params[0]),
+            collected_at=int(decoded_params[1]),
+        )
+
+        self._add_transformed(event)
 
     def _on_stop_rent(self, event: Any, decoded_params: List[Any]) -> None:
         # StopRent(indexed uint256 rentingID, uint32 stoppedAt)
 
-        self._add_transformed(StopRentEvent.from_covalent(event, decoded_params))
+        event = StopRentEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            renting_id=int(decoded_params[0]),
+            stopped_at=int(decoded_params[1])
+        )
+
+        self._add_transformed(event)
 
     def _on_stop_lend(self, event: Any, decoded_params: List[Any]) -> None:
         # StopLend(uint256 indexed lendingID, uint32 stoppedAt)
 
-        self._add_transformed(StopLendEvent.from_covalent(event, decoded_params))
+        event = StopLendEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            lending_id=int(decoded_params[0]),
+            stopped_at=int(decoded_params[1]),
+        )
+
+        self._add_transformed(event)
 
     def _on_rent(self, event: Any, decoded_params: List[Any]) -> None:
         # Rent(indexed address renterAddress, indexed uint256 lendingID, indexed uint256 rentingID,
         # uint16 rentAmount, uint8 rentDuration, uint32 rentedAt)
 
-        self._add_transformed(RentEvent.from_covalent(event, decoded_params))
+        event = RentEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            renter_address=decoded_params[0],
+            lending_id=int(decoded_params[1]),
+            renting_id=int(decoded_params[2]),
+            rent_amount=int(decoded_params[3]),
+            rent_duration=int(decoded_params[4]),
+            rented_at=int(decoded_params[5])
+        )
+
+        self._add_transformed(event)
 
     def _on_lend(self, event: Any, decoded_params: List[Any]) -> None:
         # Lend(bool is721, indexed address lenderAddress, indexed address nftAddress, indexed uint256 tokenID, 
         # uint256 lendingID, uint8 maxRentDuration, bytes4 dailyRentPrice, uint16 lendAmount, uint8 paymentToken)
 
-        self._add_transformed(LendEvent.from_covalent(event, decoded_params))
+        event = LendEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            is_721=decoded_params[0],
+            lender_address=decoded_params[1],
+            nft_address=decoded_params[2],
+            token_id=decoded_params[3],
+            lending_id=int(decoded_params[4]),
+            max_rent_duration=int(decoded_params[5]),
+            daily_rent_price=unpack_price(decoded_params[6]),
+            lend_amount=int(decoded_params[7]),
+            payment_token=int(decoded_params[8]),
+        )
+
+        self._add_transformed(event)
 
 
 # todo: do not save empty lists

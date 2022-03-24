@@ -11,7 +11,7 @@ SLEEP_TIMER = 10
 
 
 class Transform(ITransform):
-    """@inheritdoc"""
+    """@inheritdoc ITransform"""
     
     def __init__(self, config: Config):
         self._config = config

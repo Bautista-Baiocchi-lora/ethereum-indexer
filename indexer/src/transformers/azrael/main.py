@@ -4,16 +4,17 @@ from typing import Any, List
 
 from db import DB
 from transform.covalent import Covalent
-from transformers.azrael_v1.event import (AzraelEvent, CollateralClaimedEvent,
-                                          LendingStoppedEvent, LentEvent,
-                                          RentedEvent, ReturnedEvent)
+from transformers.azrael.event import (AzraelEvent, CollateralClaimedEvent,
+                                       LendingStoppedEvent, LentEvent,
+                                       RentedEvent, ReturnedEvent)
+from transformers.azrael.util import unpack_price
 
 
 # todo: needs to inherit an interface that implements flush
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    """ReNFT Azrael v1 Transformer"""
+    """ReNFT azrael Transformer"""
 
     def __init__(self, address: str):
 
@@ -76,7 +77,7 @@ class Transformer:
                     self._on_lending_stopped(event, decoded_params)
                 elif event["decoded"]["name"] == "CollateralClaimed":
                     self._on_collateral_claim(event, decoded_params)
-                
+
             logging.info(event)
 
         self._flush_state = True
@@ -111,30 +112,75 @@ class Transformer:
     def _on_collateral_claim(self, event: Any, decoded_params: List[Any]) -> None:
         # CollateralClaimed(indexed uint256 lendingId, uint32 claimedAt)
 
-        self._add_transformed(CollateralClaimedEvent.from_covalent(event, decoded_params))
+        event = CollateralClaimedEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            lending_id=int(decoded_params[0]),
+            claimed_at=int(decoded_params[1])
+        )
+
+        self._add_transformed(event)
 
     def _on_lending_stopped(self, event: Any, decoded_params: List[Any]) -> None:
         # LendingStopped(indexed uint256 lendingId, uint32 stoppedAt)
 
-        self._add_transformed(LendingStoppedEvent.from_covalent(event, decoded_params))
+        event = LendingStoppedEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            lending_id=int(decoded_params[0]),
+            stopped_at=int(decoded_params[1])
+        )
+
+        self._add_transformed(event)
 
     def _on_returned(self, event: Any, decoded_params: List[Any]) -> None:
         # Returned(indexed uint256 lendingId, uint32 returnedAt)
 
-        self._add_transformed(ReturnedEvent.from_covalent(event, decoded_params))
+        event = ReturnedEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            lending_id=int(decoded_params[0]),
+            returned_at=int(decoded_params[1])
+        )
+
+        self._add_transformed(event)
 
     def _on_rented(self,  event: Any, decoded_params: List[Any]) -> None:
         # Rented(uint256 lendingId, indexed address renterAddress, uint8 rentDuration, uint32 rentedAt)
 
-        self._add_transformed(RentedEvent.from_covalent(event, decoded_params))
+        event = RentedEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            lending_id=int(decoded_params[0]),
+            renter_address=decoded_params[1],
+            rent_duration=int(decoded_params[2]),
+            rented_at=int(decoded_params[3])
+            )
+
+        self._add_transformed(event)
 
     # TODO: typing for event
     def _on_lent(self, event: Any, decoded_params: List[Any]) -> None:
-        # Lent(indexed address nftAddress, indexed uint256 tokenId, uint8 lentAmount, uint256 lendingId,
-        # indexed address lenderAddress, uint8 maxRentDuration, bytes4 dailyRentPrice,
-        # bytes4 nftPrice, bool isERC721, uint8 paymentToken)
+        # Lent(indexed address nftAddress, indexed uint256 tokenId, uint8 lentAmount,
+        # uint256 lendingId, indexed address lenderAddress, uint8 maxRentDuration,
+        # bytes4 dailyRentPrice, bytes4 nftPrice, bool isERC721, uint8 paymentToken)
 
-        self._add_transformed(LentEvent.from_covalent(event, decoded_params))
+        event = LentEvent.create(
+            tx_hash=event['tx_hash'],
+            log_offset=event['log_offset'],
+            nft_address=decoded_params[0],
+            token_id=decoded_params[1],
+            lent_amount=int(decoded_params[2]),
+            lending_id=int(decoded_params[3]),
+            lender_address=decoded_params[4],
+            max_rent_duration=int(decoded_params[5]),
+            daily_rent_price=unpack_price(decoded_params[6]),
+            nft_price=unpack_price(decoded_params[7]),
+            is_ERC721=decoded_params[8],
+            payment_token=int(decoded_params[9])
+        )
+
+        self._add_transformed(event)
 
 
 # todo: do not save empty lists

@@ -15,7 +15,7 @@ EXTRACT_SLEEP_TIME = 15 # in seconds
 
 
 class Extract(IExtract):
-    """@inheritdoc"""
+    """@inheritdoc IExtract"""
 
     def __init__(self, config: Config):
         """

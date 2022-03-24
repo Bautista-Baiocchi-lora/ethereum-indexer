@@ -24,7 +24,8 @@ class Config:
             "_network_id",
         ]
         for k in forbid_reset_on:
-            if key == k and hasattr(self, k):
+            if key == k and hasattr(self, 
+            k):
                 raise AttributeError(
                     "The value of the address attribute has already been set,"
                     " and can not be re-set."
@@ -77,45 +78,47 @@ class Config:
     # Presets
 
     @classmethod
-    def sylvester_v1(cls):
+    def sylvester(cls):
         """
-        Returns instance of an sylvester v1
+        Returns instance of a sylvester
         indexer and transformer. It collects all the raw
-        transactions from sylvester v1 and transforms them such that
-        you can know all of the on-chain emitted events.
+        transactions from sylvester and transforms them such that
+        you can know all of the on-chain emitted events. Using these events
+        an on-chain state can be reconstructed off-chain.
 
         Network: Ethereum Mainnet.
 
         Returns:
-            _type_: instance of this class with the correct
+            (Config): instance of this Config class instantiated with the correct
             configs.
         """
 
         address = "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a"
-        log_filename = "sylvester_v1.log"
-        transformer_name = "sylvester_v1"
+        log_filename = "sylvester.log"
+        transformer_name = "sylvester"
         network_id = 1
 
         return cls(address, log_filename, transformer_name, network_id)
 
     @classmethod
-    def azrael_v1(cls):
+    def azrael(cls):
         """
-        Returns instance of an azrael v1
+        Returns instance of a azrael
         indexer and transformer. It collects all the raw
-        transactions from azrael v1 and transforms them such that
-        you can know all of the on-chain emitted events.
+        transactions from azrael and transforms them such that
+        you can know all of the on-chain emitted events. Using these events
+        an on-chain state can be reconstructed off-chain.
 
         Network: Ethereum Mainnet.
 
         Returns:
-            _type_: instance of this class with the correct
+            (Config): instance of this Config class instantiated with the correct
             configs.
         """
 
         address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
-        log_filename = "azrael_v1.log"
-        transformer_name = "azrael_v1"
+        log_filename = "azrael.log"
+        transformer_name = "azrael"
         network_id = 1
 
         return cls(address, log_filename, transformer_name, network_id)
@@ -132,7 +135,7 @@ class Config:
         Network: Ethereum Mainnet.
 
         Returns:
-            _type_: instance of this class with the correct
+            (Config): instance of this Config class instantiated with the correct
             configs.
         """
 
@@ -155,7 +158,7 @@ class Config:
         Network: Ethereum Kovan.
 
         Returns:
-            _type_: instance of this class with the correct
+            (Config): instance of this Config class instantiated with the correct
             configs.
         """
 

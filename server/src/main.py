@@ -12,7 +12,7 @@ from interfaces.iserver import IServer
 
 
 class Server(IServer):
-    """@inheritdoc"""
+    """@inheritdoc IServer"""
 
     def __init__(self, to_serve: str, host: Optional[str] = "0.0.0.0", port: Optional[int] = 8080, 
         graphiql_debug: Optional[bool] = False) -> None:
@@ -46,8 +46,8 @@ class Server(IServer):
 def main():
     """Graphql Server Entrypoint"""
 
-    log_file = "sylvester_v1.log"
-    to_serve = "sylvester_v1"
+    log_file = "azrael.log"
+    to_serve = "azrael"
 
     logging.basicConfig(
         filename=log_file,
