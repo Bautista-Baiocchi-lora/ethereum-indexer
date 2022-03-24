@@ -4,7 +4,7 @@ from typing import Any, List
 
 from db import DB
 from transform.covalent import Covalent
-from transformers.sylvester_v1.event import (LendEvent, RentClaimedEvent,
+from transformers.sylvester.event import (LendEvent, RentClaimedEvent,
                                              RentEvent, StopLendEvent,
                                              StopRentEvent, SylvesterEvent)
 
@@ -13,7 +13,7 @@ from transformers.sylvester_v1.event import (LendEvent, RentClaimedEvent,
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    """ReNFT Sylvester v1 Transformer"""
+    """ReNFT sylvester Transformer"""
 
     def __init__(self, address: str):
 

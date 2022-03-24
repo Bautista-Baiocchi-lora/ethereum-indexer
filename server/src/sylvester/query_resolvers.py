@@ -4,7 +4,7 @@ import pymongo
 from db import DB
 from tartiflette import Resolver
 
-from sylvester_v1.event import (LendEvent, RentClaimedEvent, RentEvent,
+from sylvester.event import (LendEvent, RentClaimedEvent, RentEvent,
                                 StopLendEvent, StopRentEvent, SylvesterEvent)
 
 database_name = 'ethereum-indexer'
@@ -21,11 +21,11 @@ async def resolve_event(name: str, args: Dict, transformer: Callable,
     Args:
         name (str): name of the event
         args (Dict): Graphql function parameters specified in query
-        transformer (Callable): Callable function that map a mongodb doc to Sylvester v1 event
+        transformer (Callable): Callable function that map a mongodb doc to sylvester event
         sort_by (Optional[str]): Index to sort mongodv results by. Defaults to 'lendingId'
 
     Returns:
-        List[Event]: List of Sylvester v1 events.
+        List[Event]: List of sylvester events.
     """
 
     limit = args['limit']
@@ -48,7 +48,7 @@ async def resolve_get_lend_events(_parent, args, _ctx, _info) -> List[LendEvent]
     Resolves 'getLendEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[LendEvent]: Event instance compatible with LendEvent Sylvester v1 Graphql schema.
+        List[LendEvent]: Event instance compatible with LendEvent sylvester Graphql schema.
     """
 
     return await resolve_event('Lend', args, LendEvent.from_doc)
@@ -60,7 +60,7 @@ async def resolve_get_rent_events(_parent, args, _ctx, _info) -> List[RentEvent]
     Resolves 'getRentEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[RentEvent]: Event instance compatible with RentEvent Sylvester v1 Graphql schema.
+        List[RentEvent]: Event instance compatible with RentEvent sylvester Graphql schema.
     """
 
     return await resolve_event('Rent', args, RentEvent.from_doc)
@@ -73,7 +73,7 @@ async def resolve_get_stop_rent_events(_parent, args, _ctx, _info) -> List[StopR
     Resolves 'getStopRentEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[StopRentEvent]: Event instance compatible with StopRent Sylvester v1 Graphql schema.
+        List[StopRentEvent]: Event instance compatible with StopRent sylvester Graphql schema.
     """
 
     return await resolve_event('StopRent', args, StopRentEvent.from_doc, sort_by = 'rentingID')
@@ -85,7 +85,7 @@ async def resolve_get_stop_lend_events(_parent, args, _ctx, _info) -> List[StopL
     Resolves 'getStopLendEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[StopRentEvent]: Event instance compatible with StopLend Sylvester v1 Graphql schema.
+        List[StopRentEvent]: Event instance compatible with StopLend sylvester Graphql schema.
     """
 
     return await resolve_event('StopLend', args, StopLendEvent.from_doc)
@@ -98,7 +98,7 @@ async def resolve_get_rent_claimed_events(_parent, args, _ctx, _info) -> List[Re
     Resolves 'getRentClaimedEvents' graphql query for the Graphql Engine.
 
     Returns:
-        List[RentClaimedEvent]: Event instance compatible with RentClaimed Sylvester v1 Graphql schema.
+        List[RentClaimedEvent]: Event instance compatible with RentClaimed sylvester Graphql schema.
     """
 
     return await resolve_event('RentClaimed', args, RentClaimedEvent.from_doc, sort_by = 'rentingID')

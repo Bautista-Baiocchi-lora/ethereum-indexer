@@ -1,4 +1,4 @@
-"""Azrael v1 Graphql query resolver"""
+"""azrael Graphql query resolver"""
 
 from typing import Callable, Dict, List, Optional
 
@@ -6,7 +6,7 @@ import pymongo
 from db import DB
 from tartiflette import Resolver
 
-from azrael_v1.event import (AzraelEvent, CollateralClaimedEvent,
+from azrael.event import (AzraelEvent, CollateralClaimedEvent,
                              LendingStoppedEvent, LentEvent, RentedEvent,
                              ReturnedEvent)
 
@@ -19,16 +19,16 @@ db = DB()
 async def resolve_event(name: str, args: Dict, transformer: Callable, 
     sort_by: Optional[str] = 'lendingId') -> List[AzraelEvent]:
     """
-    Resolves Azrael v1 event graphql query generically.
+    Resolves azrael event graphql query generically.
 
     Args:
         name (str): name of the event
         args (Dict): Graphql function parameters specified in query
-        transformer (Callable): Callable function that map a mongodb doc to Azrael v1 event
+        transformer (Callable): Callable function that map a mongodb doc to azrael event
         sort_by (Optional[str]): Index to sort mongodv results by. Defaults to 'lendingId'
 
     Returns:
-        List[Event]: List of Azrael v1 events.
+        List[Event]: List of azrael events.
     """
 
     limit = args['limit']

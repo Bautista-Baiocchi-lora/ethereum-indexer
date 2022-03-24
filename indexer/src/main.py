@@ -9,13 +9,23 @@ from transform.main import Transform
 
 
 def extract_and_load(address: str) -> None:
-    """Initiate and start extractor"""
+    """
+    Initiate and start extractor process.
+
+    Args:
+        address (str): Target wallet address for extractor
+    """
 
     extract = Extract(address)
     extract()
 
 def transform_and_load(to_transform: str) -> None:
-    """Initiate and start transform"""
+    """
+    Initiate and start transformer process.
+
+    Args:
+        to_transform (str): Transformer sub-directory name to be instantiated
+    """
 
     transform = Transform(to_transform)
     transform()
@@ -25,7 +35,7 @@ def main():
     One for extraction, and one for transforming.
     """
 
-    config = Config.sylvester_v1()
+    config = Config.azrael()
 
     logging.basicConfig(
         filename=config.get_log_filename(),
