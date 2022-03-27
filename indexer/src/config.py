@@ -24,8 +24,7 @@ class Config:
             "_network_id",
         ]
         for k in forbid_reset_on:
-            if key == k and hasattr(self, 
-            k):
+            if key == k and hasattr(self, k):
                 raise AttributeError(
                     "The value of the address attribute has already been set,"
                     " and can not be re-set."
@@ -80,17 +79,15 @@ class Config:
     @classmethod
     def sylvester(cls):
         """
-        Returns instance of a sylvester
-        indexer and transformer. It collects all the raw
-        transactions from sylvester and transforms them such that
-        you can know all of the on-chain emitted events. Using these events
-        an on-chain state can be reconstructed off-chain.
+        Factory method for Sylvester indexer and transformer configuration presets.
 
-        Network: Ethereum Mainnet.
+        Contract address: 0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a
+        Log filename: sylvester.log
+        Transformer Name: sylvester
+        Network: 1 (Ethereum Mainnet).
 
         Returns:
-            (Config): instance of this Config class instantiated with the correct
-            configs.
+            (Config): Sylvester Indexer/Transformer Config instance.
         """
 
         address = "0xa8D3F65b6E2922fED1430b77aC2b557e1fa8DA4a"
@@ -103,17 +100,15 @@ class Config:
     @classmethod
     def azrael(cls):
         """
-        Returns instance of a azrael
-        indexer and transformer. It collects all the raw
-        transactions from azrael and transforms them such that
-        you can know all of the on-chain emitted events. Using these events
-        an on-chain state can be reconstructed off-chain.
+        Factory method for Azrael indexer and transformer configuration presets.
 
-        Network: Ethereum Mainnet.
+        Contract address: 0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7
+        Log filename: azrael.log
+        Transformer Name: azrael
+        Network: 1 (Ethereum Mainnet).
 
         Returns:
-            (Config): instance of this Config class instantiated with the correct
-            configs.
+            (Config): Azrael Indexer/Transformer Config instance.
         """
 
         address = "0x94D8f036a0fbC216Bb532D33bDF6564157Af0cD7"
