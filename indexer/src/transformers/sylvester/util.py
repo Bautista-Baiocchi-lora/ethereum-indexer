@@ -9,9 +9,11 @@ def hex_to_int(hex_str: str) -> int:
     """hex bytes to integer"""
     return int(hex_str, 16)
 
+
 def bytes_to_int(value) -> int:
     """bytes to interger"""
-    return int.from_bytes(value, byteorder='big', signed=False)
+    return int.from_bytes(value, byteorder="big", signed=False)
+
 
 def unpack_price(price: str) -> int:
     """
@@ -24,7 +26,7 @@ def unpack_price(price: str) -> int:
         (int): unpacked price
     """
     # Covalent returns bytes4 types encoded in base64
-    price = base64.b64decode(price).hex().upper() # decode into hex
+    price = base64.b64decode(price).hex().upper()  # decode into hex
     whole_hex = price[:4]
     decimal_hex = price[4:]
 
@@ -34,6 +36,6 @@ def unpack_price(price: str) -> int:
     whole = min(whole, 9999)
     decimal = min(decimal, 9999)
 
-    # shift right, round to 4 decimal places
-    decimal = round(decimal * 10**-4 , 4)
+    # shift right 4 decimal places
+    decimal = decimal * 10**-4
     return whole + decimal

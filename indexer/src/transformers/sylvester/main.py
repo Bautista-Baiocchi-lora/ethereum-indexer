@@ -1,12 +1,16 @@
-import base64
 import logging
 from typing import Any, List
 
 from db import DB
 from transform.covalent import Covalent
-from transformers.sylvester.event import (LendEvent, RentClaimedEvent,
-                                          RentEvent, StopLendEvent,
-                                          StopRentEvent, SylvesterEvent)
+from transformers.sylvester.event import (
+    LendEvent,
+    RentClaimedEvent,
+    RentEvent,
+    StopLendEvent,
+    StopRentEvent,
+    SylvesterEvent,
+)
 from transformers.sylvester.util import unpack_price
 
 
@@ -14,7 +18,16 @@ from transformers.sylvester.util import unpack_price
 # todo: every instance should also take the address it transforms
 # todo: as a constructor argument
 class Transformer:
-    """ReNFT sylvester Transformer"""
+    """
+    ReNFT Sylvester Transformer
+
+    The Extractor stores on-chain Sylvester transactions on disk.
+    The Transformer transforms these transcations into events emitted
+    by the Sylvester contract. Using these events an on-chain state can
+    be reconstructed off-chain.
+
+    Sylvester Events of interest are: Lend, Rent, StopRent, StopLend, RentClaimed
+    """
 
     def __init__(self, address: str):
 
@@ -23,14 +36,21 @@ class Transformer:
         self._transformed = []
 
         self._db_name = "ethereum-indexer"
-        self._collection_name = f"{address}-state"
-        self._events_of_interest = ["Lend", "Rent", "StopLend", "StopRent", "RentClaimed"]
+        self._collection_name = f"{self._address}-state"
+        self._events_of_interest = [
+            "Lend",
+            "Rent",
+            "StopLend",
+            "StopRent",
+            "RentClaimed",
+        ]
 
         self._flush_state = False
 
         self._db = DB()
 
     # todo: type that returns transformed transaction
+    # TODO: documentation
     def entrypoint(self, txn) -> None:
         """_summary_
 
@@ -77,7 +97,7 @@ class Transformer:
                     self._on_stop_rent(event, decoded_params)
                 elif event["decoded"]["name"] == "RentClaimed":
                     self._on_rent_claimed(event, decoded_params)
-                    
+
             logging.info(event)
 
         self._flush_state = True
@@ -113,8 +133,8 @@ class Transformer:
         # RentClaimed(uint256 indexed rentingID, uint32 collectedAt)
 
         event = RentClaimedEvent.create(
-            tx_hash=event['tx_hash'],
-            log_offset=event['log_offset'],
+            tx_hash=event["tx_hash"],
+            log_offset=event["log_offset"],
             renting_id=int(decoded_params[0]),
             collected_at=int(decoded_params[1]),
         )
@@ -125,10 +145,10 @@ class Transformer:
         # StopRent(indexed uint256 rentingID, uint32 stoppedAt)
 
         event = StopRentEvent.create(
-            tx_hash=event['tx_hash'],
-            log_offset=event['log_offset'],
+            tx_hash=event["tx_hash"],
+            log_offset=event["log_offset"],
             renting_id=int(decoded_params[0]),
-            stopped_at=int(decoded_params[1])
+            stopped_at=int(decoded_params[1]),
         )
 
         self._add_transformed(event)
@@ -137,8 +157,8 @@ class Transformer:
         # StopLend(uint256 indexed lendingID, uint32 stoppedAt)
 
         event = StopLendEvent.create(
-            tx_hash=event['tx_hash'],
-            log_offset=event['log_offset'],
+            tx_hash=event["tx_hash"],
+            log_offset=event["log_offset"],
             lending_id=int(decoded_params[0]),
             stopped_at=int(decoded_params[1]),
         )
@@ -150,25 +170,27 @@ class Transformer:
         # uint16 rentAmount, uint8 rentDuration, uint32 rentedAt)
 
         event = RentEvent.create(
-            tx_hash=event['tx_hash'],
-            log_offset=event['log_offset'],
+            tx_hash=event["tx_hash"],
+            log_offset=event["log_offset"],
             renter_address=decoded_params[0],
             lending_id=int(decoded_params[1]),
             renting_id=int(decoded_params[2]),
             rent_amount=int(decoded_params[3]),
             rent_duration=int(decoded_params[4]),
-            rented_at=int(decoded_params[5])
+            rented_at=int(decoded_params[5]),
         )
 
         self._add_transformed(event)
 
     def _on_lend(self, event: Any, decoded_params: List[Any]) -> None:
-        # Lend(bool is721, indexed address lenderAddress, indexed address nftAddress, indexed uint256 tokenID, 
-        # uint256 lendingID, uint8 maxRentDuration, bytes4 dailyRentPrice, uint16 lendAmount, uint8 paymentToken)
+        # Lend(bool is721, indexed address lenderAddress, indexed address nftAddress,
+        # indexed uint256 tokenID,
+        # uint256 lendingID, uint8 maxRentDuration, bytes4 dailyRentPrice,
+        # uint16 lendAmount, uint8 paymentToken)
 
         event = LendEvent.create(
-            tx_hash=event['tx_hash'],
-            log_offset=event['log_offset'],
+            tx_hash=event["tx_hash"],
+            log_offset=event["log_offset"],
             is_721=decoded_params[0],
             lender_address=decoded_params[1],
             nft_address=decoded_params[2],

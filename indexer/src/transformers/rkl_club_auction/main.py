@@ -14,7 +14,7 @@ PLACE_BID_EVENT = "0xe694ab314354b7ccad603c48b44dce6ade8b6a57cbebaa8842edd9a2fb2
 # todo: as a constructor argument
 class Transformer:
     """RKL Club Auction Transformer"""
-    
+
     def __init__(self, address: str):
 
         self._address = address
@@ -22,7 +22,7 @@ class Transformer:
         self._transformed = {"_id": 1}
 
         self._db_name = "ethereum-indexer"
-        self._collection_name = f"{address}-state"
+        self._collection_name = f"{self._address}-state"
 
         self._flush_state = False
 
@@ -48,6 +48,7 @@ class Transformer:
         return bytes.fromhex(hexstring[2:])
 
     # todo: txn dataclass
+    # TODO: documentation
     def entrypoint(self, txn):
         """
         Main entrypoint for transforming the raw data. Responsible

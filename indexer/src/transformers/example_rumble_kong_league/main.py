@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from db import DB
 from transform.covalent import Covalent
@@ -18,7 +17,7 @@ class Transformer:
         self._transformed = {"_id": 1}
 
         self._db_name = "ethereum-indexer"
-        self._collection_name = f"{address}-state"
+        self._collection_name = f"{self._address}-state"
         self._events_of_interest = ["Transfer"]
 
         self._flush_state = False
@@ -26,6 +25,7 @@ class Transformer:
         self._db = DB()
 
     # todo: type that returns transformed transaction
+    # TODO: documentation
     def entrypoint(self, txn) -> None:
         """_summary_
 
@@ -57,7 +57,7 @@ class Transformer:
             if event["decoded"] is None:
                 logging.warning(f"No name for event: {event}")
                 continue
-            
+
             if event["decoded"]["name"] in self._events_of_interest:
                 decoded_params = Covalent.decode(event)
                 if event["decoded"]["name"] == "Transfer":
