@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 from extract.covalent import Covalent as Covalent_
 
@@ -7,18 +7,20 @@ class Covalent(Covalent_):
     """@inheritdoc Covalent"""
 
     # todo: better txn type
+    # TODO: Support more types
     @staticmethod
-    def decode(event: Dict) -> List:
-        """_summary_
+    def decode(event: Dict) -> Dict:
+        """Decodes Covalent blockchain event into Dict. Takes care of casting
+        solidity types to proper pythonic types.
 
         Args:
-            event (Dict): _description_
+            event (Dict): Covalent blockchain event.
 
         Returns:
-            List: _description_
+            Dict: name to value mapping.
         """
 
-        decoded = []
+        decoded = {}
 
         # raw transaction log in case covalent failed to
         # decode some params
@@ -28,12 +30,12 @@ class Covalent(Covalent_):
 
         for ix, decoded_param in enumerate(decoded_params):
             if decoded_param["decoded"] is True:
-                decoded.append(decoded_param["value"])
+                decoded[decoded_param["name"]] = decoded_param["value"]
             else:
                 raw_param = raw_log_topics[ix + 1]
 
                 if decoded_param["type"] == "uint256":
-                    decoded.append(int(raw_param, 16))
+                    decoded[decoded_param["name"]] = int(raw_param, 16)
                 # TODO: Other types
                 else:
                     raise NotImplementedError(

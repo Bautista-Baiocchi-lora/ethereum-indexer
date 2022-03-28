@@ -135,8 +135,8 @@ class Transformer:
         event = CollateralClaimedEvent.create(
             tx_hash=event["tx_hash"],
             log_offset=event["log_offset"],
-            lending_id=int(decoded_params[0]),
-            claimed_at=int(decoded_params[1]),
+            lending_id=int(decoded_params["lendingId"]),
+            claimed_at=int(decoded_params["claimedAt"]),
         )
 
         self._add_transformed(event)
@@ -147,8 +147,8 @@ class Transformer:
         event = LendingStoppedEvent.create(
             tx_hash=event["tx_hash"],
             log_offset=event["log_offset"],
-            lending_id=int(decoded_params[0]),
-            stopped_at=int(decoded_params[1]),
+            lending_id=int(decoded_params["lendingId"]),
+            stopped_at=int(decoded_params["stoppedAt"]),
         )
 
         self._add_transformed(event)
@@ -159,8 +159,8 @@ class Transformer:
         event = ReturnedEvent.create(
             tx_hash=event["tx_hash"],
             log_offset=event["log_offset"],
-            lending_id=int(decoded_params[0]),
-            returned_at=int(decoded_params[1]),
+            lending_id=int(decoded_params["lendingId"]),
+            returned_at=int(decoded_params["returnedAt"]),
         )
 
         self._add_transformed(event)
@@ -172,10 +172,10 @@ class Transformer:
         event = RentedEvent.create(
             tx_hash=event["tx_hash"],
             log_offset=event["log_offset"],
-            lending_id=int(decoded_params[0]),
-            renter_address=decoded_params[1],
-            rent_duration=int(decoded_params[2]),
-            rented_at=int(decoded_params[3]),
+            lending_id=int(decoded_params["lendingId"]),
+            renter_address=decoded_params["renterAddress"],
+            rent_duration=int(decoded_params["rentDuration"]),
+            rented_at=int(decoded_params["rentedAt"]),
         )
 
         self._add_transformed(event)
@@ -189,16 +189,16 @@ class Transformer:
         event = LentEvent.create(
             tx_hash=event["tx_hash"],
             log_offset=event["log_offset"],
-            nft_address=decoded_params[0],
-            token_id=decoded_params[1],
-            lent_amount=int(decoded_params[2]),
-            lending_id=int(decoded_params[3]),
-            lender_address=decoded_params[4],
-            max_rent_duration=int(decoded_params[5]),
-            daily_rent_price=unpack_price(decoded_params[6]),
-            nft_price=unpack_price(decoded_params[7]),
-            is_ERC721=decoded_params[8],
-            payment_token=int(decoded_params[9]),
+            nft_address=decoded_params["nftAddress"],
+            token_id=decoded_params["tokenId"],
+            lent_amount=int(decoded_params["lentAmount"]),
+            lending_id=int(decoded_params["lendingId"]),
+            lender_address=decoded_params["lenderAddress"],
+            max_rent_duration=int(decoded_params["maxRentDuration"]),
+            daily_rent_price=unpack_price(decoded_params["dailyRentPrice"]),
+            nft_price=unpack_price(decoded_params["nftPrice"]),
+            is_ERC721=decoded_params["isERC721"],
+            payment_token=int(decoded_params["paymentToken"]),
         )
 
         self._add_transformed(event)
